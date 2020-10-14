@@ -1,4 +1,4 @@
-# TEAM NAME Final Project
+# SCHRODINGER Final Project
 Final Project for CSCI 6421 
 
 Team Members
