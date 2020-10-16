@@ -42,7 +42,7 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
   - repartition the affected keys on the existing node;
   - reorganize the neighbor nodes;
   - to connect new nodes to DHT through a guiding mechanism.
-- For example, in Apache Cassandra (John Hammink, 2019), an open-source NoSQL DHT system, each node can communicate with a constant amount of other nodes, which let the system to scale linearly over a huge number of nodes.
+- For example, in Apache Cassandra [(John Hammink, 2019)](https://aiven.io/blog/an-introduction-to-apache-cassandra#:~:text=This%20is%20one%20of%20the,and%20data%20centers%20go%20down), an open-source NoSQL DHT system, each node can communicate with a constant amount of other nodes, which let the system to scale linearly over a huge number of nodes.
 
 ## References
 1. Byers, John, Jeffrey Considine, and Michael Mitzenmacher. "Simple load balancing for distributed hash tables." International Workshop on Peer-to-Peer Systems. Springer, Berlin, Heidelberg, 2003.
@@ -51,4 +51,3 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
 4. Dougherty, Michael, Haklin Kimm, and Ho-sang Ham. "Implementation of the distributed hash tables on peer-to-peer networks." 2008 IEEE Sarnoff Symposium. IEEE, 2008.
 5. Awerbuch, Baruch, and Christian Scheideler. "Towards a scalable and robust DHT." Theory of Computing Systems 45.2 (2009): 234-260.
 6. Storm, Christian. Specification and Analytical Evaluation of Heterogeneous Dynamic Quorum-Based Data Replication Schemes. Springer Science & Business Media, 2012.
-7. [John Hammink. "An introduction to Apache Cassandra". 2019.](https://aiven.io/blog/an-introduction-to-apache-cassandra#:~:text=This%20is%20one%20of%20the,and%20data%20centers%20go%20down)
