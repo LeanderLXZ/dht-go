@@ -8,24 +8,48 @@ Zetian Zheng
 Xiaoyu Shen
 Guangyuan Shen
 ```
-
 ## Topic: Distributed Hash Table
 
-A Distributed Hash Table (DHT) is a distributed system that provides a lookup service similar to a hash table: key-value pairs are stored in a DHT, and any participating node can efficiently retrieve the value associated with a given key. 
+A Distributed Hash Table (DHT) is a distributed system that provides a lookup service similar to a hash table. The network maintains a huge file index hash table, divided and stored on each node of the network according to certain rules, with entries in the form of (key, value). Usually, the key is the hash value of the file, and the value is the IP address where the file is stored. Given the key, the value/address stored in the node can be efficiently found and returned to the query node.
+
 [(Wikipedia: Distributed hash table)](https://en.wikipedia.org/wiki/Distributed_hash_table?oldformat=true)
 
 <p align="center">
   <img width="600" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/DHT_en.svg/1000px-DHT_en.svg.png" />
 </p>
 
-## Main Challenges
-- **Autonomy and decentralization:** the nodes collectively form the system without any central coordination.
-- **Fault tolerance:** the system should be reliable (in some sense) even with nodes continuously joining, leaving, and failing.
-- **Scalability:** the system should function efficiently even with thousands or millions of nodes.
+**State-of-the-art DHT algorithms (for reference):**
+1. **Chord** - a protocol and algorithm for a peer-to-peer distributed hash table
+[(Wikipedia: Chord (peer-to-peer))](https://en.wikipedia.org/wiki/Chord_(peer-to-peer)?oldformat=true)
 
-## Paper Reference
-1. Byers, J., Considine, J., & Mitzenmacher, M. (2003, February). Simple load balancing for distributed hash tables. In International Workshop on Peer-to-Peer Systems (pp. 80-87). Springer, Berlin, Heidelberg.
-2. Stoica, I., Morris, R., Liben-Nowell, D., Karger, D., Kaashoek, M., Dabek, F., & Balakrishnan, H. (2003). Chord: a scalable peer-to-peer lookup protocol for internet applications. IEEE/ACM Transactions on Networking, 11(1), 17–32. https://doi.org/10.1109/tnet.2002.808407
-3. Talia, Domenico; Trunfio, Paolo (December 2010). "Enabling Dynamic Querying over Distributed Hash Tables". Journal of Parallel and Distributed Computing. 70 (12): 1254–1265. doi:10.1016/j.jpdc.2010.08.012.
-4. Dougherty, H. Kimm and H. Ham, "Implementation of the Distributed Hash Tables on Peer-to-peer Networks," 2008 IEEE Sarnoff Symposium, Princeton, NJ, 2008, pp. 1-5, doi: 10.1109/SARNOF.2008.4520057.
-5. Baruch Awerbuch, Christian Scheideler. "Towards a scalable and robust DHT". 2006.doi:10.1145/1148109.1148163
+2. **Pastry** - an overlay network and routing network for the implementation of a distributed hash table similar to Chord.
+[(Wikipedia: Pastry (DHT))](https://en.wikipedia.org/wiki/Pastry_(DHT)?oldformat=true)
+
+3. **Tapestry** - a peer-to-peer overlay network which provides a distributed hash table, routing, and multicasting infrastructure for distributed applications.
+[(Wikipedia: Tapestry (DHT))](https://en.wikipedia.org/wiki/Tapestry_(DHT)?oldformat=true)
+
+## Challenges
+1. **Autonomy and decentralization**
+- In this DHT system, the nodes should be autonomous and decentralized, which means it has no central coordination.
+- For each object, the node responsible for the object should be reachable through a short routing path.
+- The number of neighbors of each node should be kept reasonable.
+2. **Fault tolerance**
+- The DHT system should be reliable and robust in any case, and avoid the crash from high concurrency.
+- In this project, we can use algorithmic controlling of the distributed system’s components to provide the desired service (Storm C, 2012).
+
+3. **Scalability**
+- The DHT should be able to handle a growing amount of nodes be added to the current system.
+- The system should be able to handle the node addition and removal:
+  - repartition the affected keys on the existing node;
+  - reorganize the neighbor nodes;
+  - to connect new nodes to DHT through a guiding mechanism.
+- For example, in Apache Cassandra (John Hammink, 2019), an open-source NoSQL DHT system, each node can communicate with a constant amount of other nodes, which let the system to scale linearly over a huge number of nodes. 
+
+## References
+1. Byers, John, Jeffrey Considine, and Michael Mitzenmacher. "Simple load balancing for distributed hash tables." International Workshop on Peer-to-Peer Systems. Springer, Berlin, Heidelberg, 2003.
+2. Stoica, Ion, et al. "Chord: a scalable peer-to-peer lookup protocol for internet applications." IEEE/ACM Transactions on networking 11.1 (2003): 17-32.
+3. Talia, Domenico, and Paolo Trunfio. "Enabling dynamic querying over distributed hash tables." Journal of Parallel and Distributed Computing 70.12 (2010): 1254-1265.
+4. Dougherty, Michael, Haklin Kimm, and Ho-sang Ham. "Implementation of the distributed hash tables on peer-to-peer networks." 2008 IEEE Sarnoff Symposium. IEEE, 2008.
+5. Awerbuch, Baruch, and Christian Scheideler. "Towards a scalable and robust DHT." Theory of Computing Systems 45.2 (2009): 234-260.
+6. Storm, Christian. Specification and Analytical Evaluation of Heterogeneous Dynamic Quorum-Based Data Replication Schemes. Springer Science & Business Media, 2012.
+7. [John Hammink. "An introduction to Apache Cassandra". 2019.](https://aiven.io/blog/an-introduction-to-apache-cassandra#:~:text=This%20is%20one%20of%20the,and%20data%20centers%20go%20down)
