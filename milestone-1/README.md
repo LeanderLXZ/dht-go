@@ -7,9 +7,6 @@ Zetian Zheng
 Xiaoyu Shen
 Guangyuan Shen
 ```
-## Why choose this project
-
-Distributed Hash Tables are both fault tolerant and resilient when key/value pairs are replicated. The ability to distribute data among the peers is in strong contrast to the Blockchain model in which every node has a copy of the entire ledger. The distributed hash table was chosen because it is the foundation of many applications, such as distributed file systems, peer-to-peer technology file sharing systems, cooperative web caching, multicast, anycast, domain name system, and instant messaging. Learning distributed hash tables also helps us better understand complex applications.
 
 ## Topic: Distributed Hash Table
 
@@ -28,6 +25,11 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
 
 3. **Tapestry** - a peer-to-peer overlay network which provides a distributed hash table, routing, and multicasting infrastructure for distributed applications.
 [(Wikipedia: Tapestry (DHT))](https://en.wikipedia.org/wiki/Tapestry_(DHT)?oldformat=true)
+
+
+## Why This Topic?
+
+Distributed Hash Tables are both fault tolerant and resilient when key/value pairs are replicated. The ability to distribute data among the peers is in strong contrast to the Blockchain model in which every node has a copy of the entire ledger. The distributed hash table was chosen because it is the foundation of many applications, such as distributed file systems, peer-to-peer technology file sharing systems, cooperative web caching, multicast, anycast, domain name system, and instant messaging. Learning distributed hash tables also helps us better understand complex applications.
 
 ## Challenges
 1. **Autonomy and decentralization**
@@ -48,22 +50,23 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
 
 ## Metrics
 
+We should use the following metrics to evaluate our project/product:
+
 1. There is no central node to coordinate the relationship between each node.
 2. The system composed of multiple nodes to store different hash tables.
 3. Nodes can be added or withdrawn freely.After adding a new node, the position of the node can be correctly determined. When a node exits or fails, it can exit correctly without affecting other nodes to continue.
 4. The main storage of the hash table is the key-value pair.
 
-## Implement
+## Programming Environment
 
-Language: golang
-Platform: AWS
-Algorithm: Chord
+- Language: Go Language
+- Platform: AWS
+- Algorithms (for reference): Chord, Pastry, Tapestry
 
 ## References
-1. Byers, John, Jeffrey Considine, and Michael Mitzenmacher. "Simple load balancing for distributed hash tables." International Workshop on Peer-to-Peer Systems. Springer, Berlin, Heidelberg, 2003.
-2. Stoica, Ion, et al. "Chord: a scalable peer-to-peer lookup protocol for internet applications." IEEE/ACM Transactions on networking 11.1 (2003): 17-32.
+1. Zave, Pamela. "Reasoning about identifier spaces: How to make chord correct." IEEE Transactions on Software Engineering 43.12 (2017): 1144-1156.
+2. R. Al-Aaridhi and K. Graffi, "Sets, lists and trees: Distributed data structures on distributed hash tables," 2016 IEEE 35th International Performance Computing and Communications Conference (IPCCC), Las Vegas, NV, 2016, pp. 1-8, doi: 10.1109/PCCC.2016.7820639.
 3. Talia, Domenico, and Paolo Trunfio. "Enabling dynamic querying over distributed hash tables." Journal of Parallel and Distributed Computing 70.12 (2010): 1254-1265.
-4. Dougherty, Michael, Haklin Kimm, and Ho-sang Ham. "Implementation of the distributed hash tables on peer-to-peer networks." 2008 IEEE Sarnoff Symposium. IEEE, 2008.
-5. Awerbuch, Baruch, and Christian Scheideler. "Towards a scalable and robust DHT." Theory of Computing Systems 45.2 (2009): 234-260.
-6. Storm, Christian. Specification and Analytical Evaluation of Heterogeneous Dynamic Quorum-Based Data Replication Schemes. Springer Science & Business Media, 2012.
-7. Nasir, M., Muhammad, K., Bellavista, P., Lee, M., & Sajjad, M. (2020). Prioritization and Alert Fusion in Distributed IoT Sensors Using Kademlia Based Distributed Hash Tables. IEEE Access, 8, 175194–175204. https://doi.org/10.1109/ACCESS.2020.3017009
+4.  Storm, Christian. Specification and Analytical Evaluation of Heterogeneous Dynamic Quorum-Based Data Replication Schemes. Springer Science & Business Media, 2012.
+5. Damian Gryski. (2018). Consistent Hashing: Algorithmic Tradeoffs. Medium, https://medium.com/@dgryski/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8
+6. Farhan Ali Khan.(2018).Chord: Building a DHT (Distributed Hash Table) in Golang. Medium. https://medium.com/techlog/chord-building-a-dht-distributed-hash-table-in-golang-67c3ce17417b
