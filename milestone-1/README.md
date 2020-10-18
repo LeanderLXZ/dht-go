@@ -9,7 +9,7 @@ Guangyuan Shen
 ```
 ## Why choose this project
 
-The distributed hash table was chosen because it is the foundation of many applications, such as distributed file systems, peer-to-peer technology file sharing systems, cooperative web caching, multicast, anycast, domain name system, and instant messaging. Learn that distributed hash tables help increase understanding of complex applications
+Distributed Hash Tables are both fault tolerant and resilient when key/value pairs are replicated. The ability to distribute data among the peers is in strong contrast to the Blockchain model in which every node has a copy of the entire ledger. The distributed hash table was chosen because it is the foundation of many applications, such as distributed file systems, peer-to-peer technology file sharing systems, cooperative web caching, multicast, anycast, domain name system, and instant messaging. Learning distributed hash tables also helps us better understand complex applications.
 
 ## Topic: Distributed Hash Table
 
@@ -66,3 +66,4 @@ Algorithm: Chord
 4. Dougherty, Michael, Haklin Kimm, and Ho-sang Ham. "Implementation of the distributed hash tables on peer-to-peer networks." 2008 IEEE Sarnoff Symposium. IEEE, 2008.
 5. Awerbuch, Baruch, and Christian Scheideler. "Towards a scalable and robust DHT." Theory of Computing Systems 45.2 (2009): 234-260.
 6. Storm, Christian. Specification and Analytical Evaluation of Heterogeneous Dynamic Quorum-Based Data Replication Schemes. Springer Science & Business Media, 2012.
+7. Nasir, M., Muhammad, K., Bellavista, P., Lee, M., & Sajjad, M. (2020). Prioritization and Alert Fusion in Distributed IoT Sensors Using Kademlia Based Distributed Hash Tables. IEEE Access, 8, 175194–175204. https://doi.org/10.1109/ACCESS.2020.3017009
