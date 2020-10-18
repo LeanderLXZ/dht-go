@@ -48,7 +48,16 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
 
 ## Metrics
 
-The distributed hash table we hope to achieve is a system composed of multiple nodes to store different hash tables, and nodes can be added or withdrawn at will, and when a node has a problem, error handling can be resolved, dynamic Maintain the state of the node.
+1. There is no central node to coordinate the relationship between each node.
+2. The system composed of multiple nodes to store different hash tables.
+3. Nodes can be added or withdrawn freely.After adding a new node, the position of the node can be correctly determined. When a node exits or fails, it can exit correctly without affecting other nodes to continue.
+4. The main storage of the hash table is the key-value pair.
+
+## Implement
+
+Language: golang
+Platform: AWS
+Algorithm: Chord
 
 ## References
 1. Byers, John, Jeffrey Considine, and Michael Mitzenmacher. "Simple load balancing for distributed hash tables." International Workshop on Peer-to-Peer Systems. Springer, Berlin, Heidelberg, 2003.
