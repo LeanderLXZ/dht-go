@@ -7,6 +7,10 @@ Zetian Zheng
 Xiaoyu Shen
 Guangyuan Shen
 ```
+## Why choose this project
+
+The distributed hash table was chosen because it is the foundation of many applications, such as distributed file systems, peer-to-peer technology file sharing systems, cooperative web caching, multicast, anycast, domain name system, and instant messaging. Learn that distributed hash tables help increase understanding of complex applications
+
 ## Topic: Distributed Hash Table
 
 A Distributed Hash Table (DHT) is a distributed system that provides a lookup service similar to a hash table [(Wikipedia: Distributed hash table)](https://en.wikipedia.org/wiki/Distributed_hash_table?oldformat=true). The network maintains a huge file index hash table, divided and stored on each node of the network according to certain rules, with entries in the form of (key, value). Usually, the key is the hash value of the file, and the value is the IP address where the file is stored. Given the key, the value/address stored in the node can be efficiently found and returned to the query node.
@@ -41,6 +45,10 @@ A Distributed Hash Table (DHT) is a distributed system that provides a lookup se
   - reorganize the neighbor nodes;
   - to connect new nodes to DHT through a guiding mechanism.
 - For example, in Apache Cassandra, an open-source NoSQL DHT system, each node can communicate with a constant amount of other nodes, which let the system to scale linearly over a huge number of nodes [(John Hammink, 2019)](https://aiven.io/blog/an-introduction-to-apache-cassandra#:~:text=This%20is%20one%20of%20the,and%20data%20centers%20go%20down).
+
+## Metrics
+
+The distributed hash table we hope to achieve is a system composed of multiple nodes to store different hash tables, and nodes can be added or withdrawn at will, and when a node has a problem, error handling can be resolved, dynamic Maintain the state of the node.
 
 ## References
 1. Byers, John, Jeffrey Considine, and Michael Mitzenmacher. "Simple load balancing for distributed hash tables." International Workshop on Peer-to-Peer Systems. Springer, Berlin, Heidelberg, 2003.
