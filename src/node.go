@@ -3,7 +3,9 @@ package src
 import (
 	"crypto/sha1"
 	"hash"
+	"sync"
 	"time"
+
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +22,28 @@ type Parameters struct {
 	ServerOptions []grpc.ServerOption
 	DialOptions   []grpc.DialOption
 }
+// structure for node
+type Node struct {
+	*models.Node
+	para 			*Parameters
 
+	predecessor 	*models.Node
+	predLock		sync.RWMutex
+
+	successor		*models.Node
+	succLock		sync.RWMutex
+
+	fingerTable 	fingerTable
+	fingerLock		sync.RWMutex
+
+	storage 		Storage
+	stLock			sync.RWMutex
+
+	transport 		Transport
+	tsLock     		sync.RWMutex
+
+	lastStablized 	time.Time
+}
 // Get a default parameters settings
 func GetDefaultParameters() *Parameters {
 	param := Parameters{}
@@ -37,4 +60,6 @@ func GetDefaultParameters() *Parameters {
 	return param
 }
 
+func(n *Node)join(newNode *model.Node) error {
 
+}
