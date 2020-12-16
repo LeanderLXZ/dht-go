@@ -567,7 +567,7 @@ func (*DeleteKeyResp) Descriptor() ([]byte, []int) {
 }
 
 // Delete multiple keys - Request
-type DeleteMultipleKeysReq struct {
+type DeleteKeysReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -575,8 +575,8 @@ type DeleteMultipleKeysReq struct {
 	Keys []string `protobuf:"bytes,1,rep,name=keys,proto3" json:"keys,omitempty"`
 }
 
-func (x *DeleteMultipleKeysReq) Reset() {
-	*x = DeleteMultipleKeysReq{}
+func (x *DeleteKeysReq) Reset() {
+	*x = DeleteKeysReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_rpc_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -584,13 +584,13 @@ func (x *DeleteMultipleKeysReq) Reset() {
 	}
 }
 
-func (x *DeleteMultipleKeysReq) String() string {
+func (x *DeleteKeysReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteMultipleKeysReq) ProtoMessage() {}
+func (*DeleteKeysReq) ProtoMessage() {}
 
-func (x *DeleteMultipleKeysReq) ProtoReflect() protoreflect.Message {
+func (x *DeleteKeysReq) ProtoReflect() protoreflect.Message {
 	mi := &file_rpc_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -602,12 +602,12 @@ func (x *DeleteMultipleKeysReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteMultipleKeysReq.ProtoReflect.Descriptor instead.
-func (*DeleteMultipleKeysReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteKeysReq.ProtoReflect.Descriptor instead.
+func (*DeleteKeysReq) Descriptor() ([]byte, []int) {
 	return file_rpc_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *DeleteMultipleKeysReq) GetKeys() []string {
+func (x *DeleteKeysReq) GetKeys() []string {
 	if x != nil {
 		return x.Keys
 	}
@@ -615,14 +615,14 @@ func (x *DeleteMultipleKeysReq) GetKeys() []string {
 }
 
 // Delete multiple keys - Response
-type DeleteMultipleKeysResp struct {
+type DeleteKeysResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *DeleteMultipleKeysResp) Reset() {
-	*x = DeleteMultipleKeysResp{}
+func (x *DeleteKeysResp) Reset() {
+	*x = DeleteKeysResp{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_rpc_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -630,13 +630,13 @@ func (x *DeleteMultipleKeysResp) Reset() {
 	}
 }
 
-func (x *DeleteMultipleKeysResp) String() string {
+func (x *DeleteKeysResp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteMultipleKeysResp) ProtoMessage() {}
+func (*DeleteKeysResp) ProtoMessage() {}
 
-func (x *DeleteMultipleKeysResp) ProtoReflect() protoreflect.Message {
+func (x *DeleteKeysResp) ProtoReflect() protoreflect.Message {
 	mi := &file_rpc_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -648,19 +648,19 @@ func (x *DeleteMultipleKeysResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteMultipleKeysResp.ProtoReflect.Descriptor instead.
-func (*DeleteMultipleKeysResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use DeleteKeysResp.ProtoReflect.Descriptor instead.
+func (*DeleteKeysResp) Descriptor() ([]byte, []int) {
 	return file_rpc_proto_rawDescGZIP(), []int{12}
 }
 
-type ER struct {
+type EmptyRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *ER) Reset() {
-	*x = ER{}
+func (x *EmptyRequest) Reset() {
+	*x = EmptyRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_rpc_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -668,13 +668,13 @@ func (x *ER) Reset() {
 	}
 }
 
-func (x *ER) String() string {
+func (x *EmptyRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ER) ProtoMessage() {}
+func (*EmptyRequest) ProtoMessage() {}
 
-func (x *ER) ProtoReflect() protoreflect.Message {
+func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_rpc_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -686,8 +686,8 @@ func (x *ER) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ER.ProtoReflect.Descriptor instead.
-func (*ER) Descriptor() ([]byte, []int) {
+// Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
+func (*EmptyRequest) Descriptor() ([]byte, []int) {
 	return file_rpc_proto_rawDescGZIP(), []int{13}
 }
 
@@ -722,47 +722,49 @@ var file_rpc_proto_rawDesc = []byte{
 	0x61, 0x69, 0x72, 0x52, 0x03, 0x6b, 0x76, 0x73, 0x22, 0x20, 0x0a, 0x0c, 0x44, 0x65, 0x6c, 0x65,
 	0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x22, 0x0f, 0x0a, 0x0d, 0x44, 0x65,
-	0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x22, 0x2b, 0x0a, 0x15, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4b, 0x65, 0x79,
-	0x73, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x09, 0x52, 0x04, 0x6b, 0x65, 0x79, 0x73, 0x22, 0x18, 0x0a, 0x16, 0x44, 0x65, 0x6c, 0x65,
-	0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x22, 0x04, 0x0a, 0x02, 0x45, 0x52, 0x32, 0xa0, 0x04, 0x0a, 0x14, 0x44, 0x69, 0x73,
-	0x74, 0x72, 0x69, 0x62, 0x75, 0x74, 0x65, 0x64, 0x48, 0x61, 0x73, 0x68, 0x54, 0x61, 0x62, 0x6c,
-	0x65, 0x12, 0x29, 0x0a, 0x06, 0x41, 0x64, 0x64, 0x4b, 0x65, 0x79, 0x12, 0x0e, 0x2e, 0x73, 0x72,
-	0x63, 0x2e, 0x41, 0x64, 0x64, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x1a, 0x0f, 0x2e, 0x73, 0x72,
-	0x63, 0x2e, 0x41, 0x64, 0x64, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2f, 0x0a, 0x08,
-	0x47, 0x65, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x12, 0x10, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47,
-	0x65, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x65, 0x71, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63,
-	0x2e, 0x47, 0x65, 0x74, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2c, 0x0a,
-	0x07, 0x47, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x0f, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47,
-	0x65, 0x74, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x10, 0x2e, 0x73, 0x72, 0x63, 0x2e,
-	0x47, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x32, 0x0a, 0x09, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x12, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x1a, 0x12, 0x2e, 0x73, 0x72,
-	0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12,
-	0x4d, 0x0a, 0x12, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c,
-	0x65, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x1a, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65,
-	0x74, 0x65, 0x4d, 0x75, 0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65,
-	0x71, 0x1a, 0x1b, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x75,
-	0x6c, 0x74, 0x69, 0x70, 0x6c, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x20,
-	0x0a, 0x0a, 0x53, 0x65, 0x74, 0x50, 0x72, 0x65, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x09, 0x2e, 0x73,
-	0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x1a, 0x07, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x52,
-	0x12, 0x21, 0x0a, 0x0b, 0x53, 0x65, 0x74, 0x4e, 0x65, 0x78, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x12,
-	0x09, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x1a, 0x07, 0x2e, 0x73, 0x72, 0x63,
-	0x2e, 0x45, 0x52, 0x12, 0x20, 0x0a, 0x0a, 0x47, 0x65, 0x74, 0x50, 0x72, 0x65, 0x4e, 0x6f, 0x64,
-	0x65, 0x12, 0x07, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x52, 0x1a, 0x09, 0x2e, 0x73, 0x72, 0x63,
-	0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x21, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x4e, 0x65, 0x78, 0x74,
-	0x4e, 0x6f, 0x64, 0x65, 0x12, 0x07, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x52, 0x1a, 0x09, 0x2e,
-	0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x28, 0x0a, 0x10, 0x43, 0x68, 0x65, 0x63,
-	0x6b, 0x50, 0x72, 0x65, 0x4e, 0x6f, 0x64, 0x65, 0x42, 0x79, 0x49, 0x64, 0x12, 0x0b, 0x2e, 0x73,
-	0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x49, 0x64, 0x1a, 0x07, 0x2e, 0x73, 0x72, 0x63, 0x2e,
-	0x45, 0x52, 0x12, 0x29, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x4e, 0x65, 0x78, 0x74, 0x4e, 0x6f, 0x64,
-	0x65, 0x42, 0x79, 0x49, 0x64, 0x12, 0x0b, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65,
-	0x49, 0x64, 0x1a, 0x09, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x1c, 0x0a,
-	0x06, 0x49, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x09, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f,
-	0x64, 0x65, 0x1a, 0x07, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x52, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x22, 0x23, 0x0a, 0x0d, 0x44,
+	0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04,
+	0x6b, 0x65, 0x79, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x65, 0x79, 0x73,
+	0x22, 0x10, 0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65,
+	0x73, 0x70, 0x22, 0x0e, 0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x32, 0xc4, 0x04, 0x0a, 0x14, 0x44, 0x69, 0x73, 0x74, 0x72, 0x69, 0x62, 0x75, 0x74,
+	0x65, 0x64, 0x48, 0x61, 0x73, 0x68, 0x54, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x29, 0x0a, 0x06, 0x41,
+	0x64, 0x64, 0x4b, 0x65, 0x79, 0x12, 0x0e, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x41, 0x64, 0x64, 0x4b,
+	0x65, 0x79, 0x52, 0x65, 0x71, 0x1a, 0x0f, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x41, 0x64, 0x64, 0x4b,
+	0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2f, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x56, 0x61, 0x6c,
+	0x75, 0x65, 0x12, 0x10, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x61, 0x6c, 0x75,
+	0x65, 0x52, 0x65, 0x71, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x61,
+	0x6c, 0x75, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2c, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x4b, 0x65,
+	0x79, 0x73, 0x12, 0x0f, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4b, 0x65, 0x79, 0x73,
+	0x52, 0x65, 0x71, 0x1a, 0x10, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4b, 0x65, 0x79,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x32, 0x0a, 0x09, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b,
+	0x65, 0x79, 0x12, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b,
+	0x65, 0x79, 0x52, 0x65, 0x71, 0x1a, 0x12, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65,
+	0x74, 0x65, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12, 0x35, 0x0a, 0x0a, 0x44, 0x65, 0x6c,
+	0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x12, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x44, 0x65,
+	0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x73, 0x72,
+	0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x12, 0x2a, 0x0a, 0x0a, 0x53, 0x65, 0x74, 0x50, 0x72, 0x65, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x09,
+	0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e,
+	0x45, 0x6d, 0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2b, 0x0a, 0x0b,
+	0x53, 0x65, 0x74, 0x4e, 0x65, 0x78, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x09, 0x2e, 0x73, 0x72,
+	0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2a, 0x0a, 0x0a, 0x47, 0x65, 0x74,
+	0x50, 0x72, 0x65, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x6d,
+	0x70, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x73, 0x72, 0x63,
+	0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x2b, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x4e, 0x65, 0x78, 0x74,
+	0x4e, 0x6f, 0x64, 0x65, 0x12, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x09, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f,
+	0x64, 0x65, 0x12, 0x32, 0x0a, 0x10, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x50, 0x72, 0x65, 0x4e, 0x6f,
+	0x64, 0x65, 0x42, 0x79, 0x49, 0x64, 0x12, 0x0b, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64,
+	0x65, 0x49, 0x64, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x29, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x4e, 0x65, 0x78,
+	0x74, 0x4e, 0x6f, 0x64, 0x65, 0x42, 0x79, 0x49, 0x64, 0x12, 0x0b, 0x2e, 0x73, 0x72, 0x63, 0x2e,
+	0x4e, 0x6f, 0x64, 0x65, 0x49, 0x64, 0x1a, 0x09, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x4e, 0x6f, 0x64,
+	0x65, 0x12, 0x26, 0x0a, 0x06, 0x49, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x12, 0x09, 0x2e, 0x73, 0x72,
+	0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x1a, 0x11, 0x2e, 0x73, 0x72, 0x63, 0x2e, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -779,20 +781,20 @@ func file_rpc_proto_rawDescGZIP() []byte {
 
 var file_rpc_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_rpc_proto_goTypes = []interface{}{
-	(*Node)(nil),                   // 0: src.Node
-	(*NodeId)(nil),                 // 1: src.NodeId
-	(*AddKeyReq)(nil),              // 2: src.AddKeyReq
-	(*AddKeyResp)(nil),             // 3: src.AddKeyResp
-	(*GetValueReq)(nil),            // 4: src.GetValueReq
-	(*GetValueResp)(nil),           // 5: src.GetValueResp
-	(*KeyValuePair)(nil),           // 6: src.KeyValuePair
-	(*GetKeysReq)(nil),             // 7: src.GetKeysReq
-	(*GetKeysResp)(nil),            // 8: src.GetKeysResp
-	(*DeleteKeyReq)(nil),           // 9: src.DeleteKeyReq
-	(*DeleteKeyResp)(nil),          // 10: src.DeleteKeyResp
-	(*DeleteMultipleKeysReq)(nil),  // 11: src.DeleteMultipleKeysReq
-	(*DeleteMultipleKeysResp)(nil), // 12: src.DeleteMultipleKeysResp
-	(*ER)(nil),                     // 13: src.ER
+	(*Node)(nil),           // 0: src.Node
+	(*NodeId)(nil),         // 1: src.NodeId
+	(*AddKeyReq)(nil),      // 2: src.AddKeyReq
+	(*AddKeyResp)(nil),     // 3: src.AddKeyResp
+	(*GetValueReq)(nil),    // 4: src.GetValueReq
+	(*GetValueResp)(nil),   // 5: src.GetValueResp
+	(*KeyValuePair)(nil),   // 6: src.KeyValuePair
+	(*GetKeysReq)(nil),     // 7: src.GetKeysReq
+	(*GetKeysResp)(nil),    // 8: src.GetKeysResp
+	(*DeleteKeyReq)(nil),   // 9: src.DeleteKeyReq
+	(*DeleteKeyResp)(nil),  // 10: src.DeleteKeyResp
+	(*DeleteKeysReq)(nil),  // 11: src.DeleteKeysReq
+	(*DeleteKeysResp)(nil), // 12: src.DeleteKeysResp
+	(*EmptyRequest)(nil),   // 13: src.EmptyRequest
 }
 var file_rpc_proto_depIdxs = []int32{
 	6,  // 0: src.GetKeysResp.kvs:type_name -> src.KeyValuePair
@@ -800,11 +802,11 @@ var file_rpc_proto_depIdxs = []int32{
 	4,  // 2: src.DistributedHashTable.GetValue:input_type -> src.GetValueReq
 	7,  // 3: src.DistributedHashTable.GetKeys:input_type -> src.GetKeysReq
 	9,  // 4: src.DistributedHashTable.DeleteKey:input_type -> src.DeleteKeyReq
-	11, // 5: src.DistributedHashTable.DeleteMultipleKeys:input_type -> src.DeleteMultipleKeysReq
+	11, // 5: src.DistributedHashTable.DeleteKeys:input_type -> src.DeleteKeysReq
 	0,  // 6: src.DistributedHashTable.SetPreNode:input_type -> src.Node
 	0,  // 7: src.DistributedHashTable.SetNextNode:input_type -> src.Node
-	13, // 8: src.DistributedHashTable.GetPreNode:input_type -> src.ER
-	13, // 9: src.DistributedHashTable.GetNextNode:input_type -> src.ER
+	13, // 8: src.DistributedHashTable.GetPreNode:input_type -> src.EmptyRequest
+	13, // 9: src.DistributedHashTable.GetNextNode:input_type -> src.EmptyRequest
 	1,  // 10: src.DistributedHashTable.CheckPreNodeById:input_type -> src.NodeId
 	1,  // 11: src.DistributedHashTable.GetNextNodeById:input_type -> src.NodeId
 	0,  // 12: src.DistributedHashTable.Inform:input_type -> src.Node
@@ -812,14 +814,14 @@ var file_rpc_proto_depIdxs = []int32{
 	5,  // 14: src.DistributedHashTable.GetValue:output_type -> src.GetValueResp
 	8,  // 15: src.DistributedHashTable.GetKeys:output_type -> src.GetKeysResp
 	10, // 16: src.DistributedHashTable.DeleteKey:output_type -> src.DeleteKeyResp
-	12, // 17: src.DistributedHashTable.DeleteMultipleKeys:output_type -> src.DeleteMultipleKeysResp
-	13, // 18: src.DistributedHashTable.SetPreNode:output_type -> src.ER
-	13, // 19: src.DistributedHashTable.SetNextNode:output_type -> src.ER
+	12, // 17: src.DistributedHashTable.DeleteKeys:output_type -> src.DeleteKeysResp
+	13, // 18: src.DistributedHashTable.SetPreNode:output_type -> src.EmptyRequest
+	13, // 19: src.DistributedHashTable.SetNextNode:output_type -> src.EmptyRequest
 	0,  // 20: src.DistributedHashTable.GetPreNode:output_type -> src.Node
 	0,  // 21: src.DistributedHashTable.GetNextNode:output_type -> src.Node
-	13, // 22: src.DistributedHashTable.CheckPreNodeById:output_type -> src.ER
+	13, // 22: src.DistributedHashTable.CheckPreNodeById:output_type -> src.EmptyRequest
 	0,  // 23: src.DistributedHashTable.GetNextNodeById:output_type -> src.Node
-	13, // 24: src.DistributedHashTable.Inform:output_type -> src.ER
+	13, // 24: src.DistributedHashTable.Inform:output_type -> src.EmptyRequest
 	13, // [13:25] is the sub-list for method output_type
 	1,  // [1:13] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
@@ -966,7 +968,7 @@ func file_rpc_proto_init() {
 			}
 		}
 		file_rpc_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMultipleKeysReq); i {
+			switch v := v.(*DeleteKeysReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -978,7 +980,7 @@ func file_rpc_proto_init() {
 			}
 		}
 		file_rpc_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMultipleKeysResp); i {
+			switch v := v.(*DeleteKeysResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -990,7 +992,7 @@ func file_rpc_proto_init() {
 			}
 		}
 		file_rpc_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ER); i {
+			switch v := v.(*EmptyRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1038,14 +1040,14 @@ type DistributedHashTableClient interface {
 	GetValue(ctx context.Context, in *GetValueReq, opts ...grpc.CallOption) (*GetValueResp, error)
 	GetKeys(ctx context.Context, in *GetKeysReq, opts ...grpc.CallOption) (*GetKeysResp, error)
 	DeleteKey(ctx context.Context, in *DeleteKeyReq, opts ...grpc.CallOption) (*DeleteKeyResp, error)
-	DeleteMultipleKeys(ctx context.Context, in *DeleteMultipleKeysReq, opts ...grpc.CallOption) (*DeleteMultipleKeysResp, error)
-	SetPreNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error)
-	SetNextNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error)
-	GetPreNode(ctx context.Context, in *ER, opts ...grpc.CallOption) (*Node, error)
-	GetNextNode(ctx context.Context, in *ER, opts ...grpc.CallOption) (*Node, error)
-	CheckPreNodeById(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*ER, error)
+	DeleteKeys(ctx context.Context, in *DeleteKeysReq, opts ...grpc.CallOption) (*DeleteKeysResp, error)
+	SetPreNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error)
+	SetNextNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error)
+	GetPreNode(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*Node, error)
+	GetNextNode(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*Node, error)
+	CheckPreNodeById(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*EmptyRequest, error)
 	GetNextNodeById(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*Node, error)
-	Inform(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error)
+	Inform(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error)
 }
 
 type distributedHashTableClient struct {
@@ -1092,17 +1094,17 @@ func (c *distributedHashTableClient) DeleteKey(ctx context.Context, in *DeleteKe
 	return out, nil
 }
 
-func (c *distributedHashTableClient) DeleteMultipleKeys(ctx context.Context, in *DeleteMultipleKeysReq, opts ...grpc.CallOption) (*DeleteMultipleKeysResp, error) {
-	out := new(DeleteMultipleKeysResp)
-	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/DeleteMultipleKeys", in, out, opts...)
+func (c *distributedHashTableClient) DeleteKeys(ctx context.Context, in *DeleteKeysReq, opts ...grpc.CallOption) (*DeleteKeysResp, error) {
+	out := new(DeleteKeysResp)
+	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/DeleteKeys", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *distributedHashTableClient) SetPreNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error) {
-	out := new(ER)
+func (c *distributedHashTableClient) SetPreNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error) {
+	out := new(EmptyRequest)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/SetPreNode", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1110,8 +1112,8 @@ func (c *distributedHashTableClient) SetPreNode(ctx context.Context, in *Node, o
 	return out, nil
 }
 
-func (c *distributedHashTableClient) SetNextNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error) {
-	out := new(ER)
+func (c *distributedHashTableClient) SetNextNode(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error) {
+	out := new(EmptyRequest)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/SetNextNode", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1119,7 +1121,7 @@ func (c *distributedHashTableClient) SetNextNode(ctx context.Context, in *Node, 
 	return out, nil
 }
 
-func (c *distributedHashTableClient) GetPreNode(ctx context.Context, in *ER, opts ...grpc.CallOption) (*Node, error) {
+func (c *distributedHashTableClient) GetPreNode(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*Node, error) {
 	out := new(Node)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/GetPreNode", in, out, opts...)
 	if err != nil {
@@ -1128,7 +1130,7 @@ func (c *distributedHashTableClient) GetPreNode(ctx context.Context, in *ER, opt
 	return out, nil
 }
 
-func (c *distributedHashTableClient) GetNextNode(ctx context.Context, in *ER, opts ...grpc.CallOption) (*Node, error) {
+func (c *distributedHashTableClient) GetNextNode(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*Node, error) {
 	out := new(Node)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/GetNextNode", in, out, opts...)
 	if err != nil {
@@ -1137,8 +1139,8 @@ func (c *distributedHashTableClient) GetNextNode(ctx context.Context, in *ER, op
 	return out, nil
 }
 
-func (c *distributedHashTableClient) CheckPreNodeById(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*ER, error) {
-	out := new(ER)
+func (c *distributedHashTableClient) CheckPreNodeById(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*EmptyRequest, error) {
+	out := new(EmptyRequest)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/CheckPreNodeById", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1155,8 +1157,8 @@ func (c *distributedHashTableClient) GetNextNodeById(ctx context.Context, in *No
 	return out, nil
 }
 
-func (c *distributedHashTableClient) Inform(ctx context.Context, in *Node, opts ...grpc.CallOption) (*ER, error) {
-	out := new(ER)
+func (c *distributedHashTableClient) Inform(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyRequest, error) {
+	out := new(EmptyRequest)
 	err := c.cc.Invoke(ctx, "/src.DistributedHashTable/Inform", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1170,14 +1172,14 @@ type DistributedHashTableServer interface {
 	GetValue(context.Context, *GetValueReq) (*GetValueResp, error)
 	GetKeys(context.Context, *GetKeysReq) (*GetKeysResp, error)
 	DeleteKey(context.Context, *DeleteKeyReq) (*DeleteKeyResp, error)
-	DeleteMultipleKeys(context.Context, *DeleteMultipleKeysReq) (*DeleteMultipleKeysResp, error)
-	SetPreNode(context.Context, *Node) (*ER, error)
-	SetNextNode(context.Context, *Node) (*ER, error)
-	GetPreNode(context.Context, *ER) (*Node, error)
-	GetNextNode(context.Context, *ER) (*Node, error)
-	CheckPreNodeById(context.Context, *NodeId) (*ER, error)
+	DeleteKeys(context.Context, *DeleteKeysReq) (*DeleteKeysResp, error)
+	SetPreNode(context.Context, *Node) (*EmptyRequest, error)
+	SetNextNode(context.Context, *Node) (*EmptyRequest, error)
+	GetPreNode(context.Context, *EmptyRequest) (*Node, error)
+	GetNextNode(context.Context, *EmptyRequest) (*Node, error)
+	CheckPreNodeById(context.Context, *NodeId) (*EmptyRequest, error)
 	GetNextNodeById(context.Context, *NodeId) (*Node, error)
-	Inform(context.Context, *Node) (*ER, error)
+	Inform(context.Context, *Node) (*EmptyRequest, error)
 }
 
 // UnimplementedDistributedHashTableServer can be embedded to have forward compatible implementations.
@@ -1196,28 +1198,28 @@ func (*UnimplementedDistributedHashTableServer) GetKeys(context.Context, *GetKey
 func (*UnimplementedDistributedHashTableServer) DeleteKey(context.Context, *DeleteKeyReq) (*DeleteKeyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKey not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) DeleteMultipleKeys(context.Context, *DeleteMultipleKeysReq) (*DeleteMultipleKeysResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteMultipleKeys not implemented")
+func (*UnimplementedDistributedHashTableServer) DeleteKeys(context.Context, *DeleteKeysReq) (*DeleteKeysResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteKeys not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) SetPreNode(context.Context, *Node) (*ER, error) {
+func (*UnimplementedDistributedHashTableServer) SetPreNode(context.Context, *Node) (*EmptyRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetPreNode not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) SetNextNode(context.Context, *Node) (*ER, error) {
+func (*UnimplementedDistributedHashTableServer) SetNextNode(context.Context, *Node) (*EmptyRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetNextNode not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) GetPreNode(context.Context, *ER) (*Node, error) {
+func (*UnimplementedDistributedHashTableServer) GetPreNode(context.Context, *EmptyRequest) (*Node, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPreNode not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) GetNextNode(context.Context, *ER) (*Node, error) {
+func (*UnimplementedDistributedHashTableServer) GetNextNode(context.Context, *EmptyRequest) (*Node, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNextNode not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) CheckPreNodeById(context.Context, *NodeId) (*ER, error) {
+func (*UnimplementedDistributedHashTableServer) CheckPreNodeById(context.Context, *NodeId) (*EmptyRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckPreNodeById not implemented")
 }
 func (*UnimplementedDistributedHashTableServer) GetNextNodeById(context.Context, *NodeId) (*Node, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNextNodeById not implemented")
 }
-func (*UnimplementedDistributedHashTableServer) Inform(context.Context, *Node) (*ER, error) {
+func (*UnimplementedDistributedHashTableServer) Inform(context.Context, *Node) (*EmptyRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Inform not implemented")
 }
 
@@ -1297,20 +1299,20 @@ func _DistributedHashTable_DeleteKey_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DistributedHashTable_DeleteMultipleKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteMultipleKeysReq)
+func _DistributedHashTable_DeleteKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteKeysReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DistributedHashTableServer).DeleteMultipleKeys(ctx, in)
+		return srv.(DistributedHashTableServer).DeleteKeys(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/src.DistributedHashTable/DeleteMultipleKeys",
+		FullMethod: "/src.DistributedHashTable/DeleteKeys",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DistributedHashTableServer).DeleteMultipleKeys(ctx, req.(*DeleteMultipleKeysReq))
+		return srv.(DistributedHashTableServer).DeleteKeys(ctx, req.(*DeleteKeysReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1352,7 +1354,7 @@ func _DistributedHashTable_SetNextNode_Handler(srv interface{}, ctx context.Cont
 }
 
 func _DistributedHashTable_GetPreNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ER)
+	in := new(EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1364,13 +1366,13 @@ func _DistributedHashTable_GetPreNode_Handler(srv interface{}, ctx context.Conte
 		FullMethod: "/src.DistributedHashTable/GetPreNode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DistributedHashTableServer).GetPreNode(ctx, req.(*ER))
+		return srv.(DistributedHashTableServer).GetPreNode(ctx, req.(*EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _DistributedHashTable_GetNextNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ER)
+	in := new(EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1382,7 +1384,7 @@ func _DistributedHashTable_GetNextNode_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/src.DistributedHashTable/GetNextNode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DistributedHashTableServer).GetNextNode(ctx, req.(*ER))
+		return srv.(DistributedHashTableServer).GetNextNode(ctx, req.(*EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1462,8 +1464,8 @@ var _DistributedHashTable_serviceDesc = grpc.ServiceDesc{
 			Handler:    _DistributedHashTable_DeleteKey_Handler,
 		},
 		{
-			MethodName: "DeleteMultipleKeys",
-			Handler:    _DistributedHashTable_DeleteMultipleKeys_Handler,
+			MethodName: "DeleteKeys",
+			Handler:    _DistributedHashTable_DeleteKeys_Handler,
 		},
 		{
 			MethodName: "SetPreNode",
