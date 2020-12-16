@@ -81,13 +81,32 @@ func (n *Node) hashKey(key string) ([]byte, error) {
 
 // findSuccessor
 // reference from paper fig. 5
-func(n *node)findNextNode(nodeId []byte) (rpc.Node, error){
+// ask node n to find the successor of id
+func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 	n.succLock.RLock()
 	defer n.succLock.RUnlock()
+	currNode := n.Node
+	succNode := n.successor
+
+	// if 
+	if succNode == nil {
+		return currNode, nil
+	}
+
+	var err error
+
+	if betweenRightIncl(nodeId, currNode.nodeId, succNode.nodeId){
+		return succNode,nil
+	} else {
+		preNode := n.closestPreNode(nodeId)
+	}
+
 
 }
 
+func(n *Node)closestPreNode(nodeId []byte) (){
 
+}
 
 /*
 	public methods
