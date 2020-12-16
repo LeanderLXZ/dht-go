@@ -49,25 +49,23 @@ func (node *Node) findNextFinger(next int) int {
 
 func FingerMath(node []byte, i int, m int) []byte {
 
-	// Convert the ID to a bigint
 	idInt := (&big.Int{}).SetBytes(node)
 
-	// Get the offset
+	// to get offset
 	twoOffset := big.NewInt(2)
 	newOffset := big.Int{}
 	newOffset.Exp(twoOffset, big.NewInt(int64(i)), nil)
 
-	// Sum
 	sum := big.Int{}
 	sum.Add(idInt, &newOffset)
 
-	// Get the ceiling
-	ceil := big.Int{}
-	ceil.Exp(twoOffset, big.NewInt(int64(m)), nil)
+	// to get the value of sceiling
+	coo := big.Int{}
+	coo.Exp(twoOffset, big.NewInt(int64(m)), nil)
 
-	// Apply the mod
-	idInt.Mod(&sum, &ceil)
+	// use Mod
+	idInt.Mod(&sum, &coo)
 
-	// Add together
+	// total sum
 	return idInt.Bytes()
 }
