@@ -85,7 +85,7 @@ func (node *Node) findSuccessorRPC(n rpc.Node, nodeId []byte) (rpc.Node, error) 
 // ---------------- Node Operations ---------------
 
 //  -----------------------------------------------
-// 					findSuccessor 
+// 					find Successor 
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
