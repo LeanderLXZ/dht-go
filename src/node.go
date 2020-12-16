@@ -40,7 +40,7 @@ func GetInitialParameters() *Parameters {
 	return param
 }
 
-func(n *Node)join(newNode rpc.Node) error {
+func(node *Node)join(newNode rpc.Node) error {
 
 }
 
@@ -70,8 +70,12 @@ type Node struct {
 //                  RPC Callers
 // ================================================
 
-func (n *Node) getSuccessorRPC(node rpc.Node) (rpc.Node, error) {
-	return n.transport.GetSuccessor(node)
+func (node *Node) getSuccessorRPC(n rpc.Node) (rpc.Node, error) {
+	return node.transport.GetSuccessor(n)
+}
+
+func (node *Node) findSuccessorRPC(n rpc.Node, nodeId []byte) (rpc.Node, error) {
+	return node.transport.FindSuccessor(n, nodeId)
 }
 
 // ================================================
@@ -82,28 +86,48 @@ func (n *Node) getSuccessorRPC(node rpc.Node) (rpc.Node, error) {
 
 //  -----------------------------------------------
 // 					findSuccessor 
-// reference from paper fig. 5
-// ask node n to find the successor of id
+// 			reference from paper fig. 5
+// 			ask node n to find the successor of id
 //	-----------------------------------------------
-func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
-	n.succLock.RLock()
-	defer n.succLock.RUnlock()
-	currNode := n.Node
-	succNode := n.successor
+func(node *Node)findNextNode(nodeId []byte) (rpc.Node, error){
+	node.succLock.RLock()
+	defer node.succLock.RUnlock()
+	currNode := node.Node
+	succNode := node.successor
+
 	// if no succNode exists
 	if succNode == nil {
 		return currNode, nil
 	}
-	
+
 	var err error
 	// ask direct predecessor for node with nodeId, 
 	// if not found, then go to find closest preceding node of nodeId in fingertable. 
 	if betweenRightIncl(nodeId, currNode.nodeId, succNode.nodeId){
 		return succNode, nil
 	} else {
-		preNode := n.closestPreNode(nodeId)
-		return preNode.successor
+		preNode := node.closestPreNode(nodeId)
+		if isEqual(preNode.nodeId, node.NodeID){
+			succNode, err = node.getSuccessorRPC(preNode)
+			if err != nil {
+				return nil, err
+			}
+			if succNode == nil {
+				return preNode, nil
+			}
+			return succNode, nil
+		}
+
+		succNode, err := node.findSuccessorRPC(preNode, nodeId)
+		if err != nil {
+			return nil, err
+		}
+		if succ == nil {
+			return currNode, nil
+		}
+		return succNode, nil
 	}
+	return nil, nil
 }
 
 // Get the value given a key
@@ -111,9 +135,27 @@ func (node *Node) getValue(key string) ([]byte, error) {
 
 }
 
+//  -----------------------------------------------
+// 				cloest predecessor node
+// search the local table for the highest predecessor of id
+// in fingerTable.
+//	-----------------------------------------------
+func(node *Node)closestPreNode(nodeId []byte) (){
+	node.predLock.RLock()
+	defer node.predLock.RUnlock()
 
-func(n *Node)closestPreNode(nodeId []byte) (){
+	currNode := node.Node
 
+	for i := len(node.finferTable) - 1; i>=0; i-- {
+		v := node.fingerTable[i]
+		if v == nil || v.Node == nil {
+			continue
+		}
+		if between(v.nodeId, currNode,nodeId, nodeId) {
+			return v.Node
+		}
+	}
+	return currNode
 }
 
 // ---------------- Key Operations ----------------
@@ -130,8 +172,6 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 }
 
 
-
-
 // ================================================
 //                  Public Methods
 // ================================================
@@ -140,10 +180,10 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 
 
 // get the predecessor node and return it
-func(n *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
-	n.predLock.RLock()
-	preNode := n.predecessor
-	n.predLock.RUnlock()
+func(node *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+	node.predLock.RLock()
+	preNode := node.predecessor
+	node.predLock.RUnlock()
 	if preNode == nil {
 		return emptyNode, nil
 	}
@@ -151,18 +191,18 @@ func(n *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the predecessor node 
-func(n *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) {
-	n.predLock.Lock()
-	n.preNode = preNode
-	n.predLock.Unlock()
+func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) {
+	node.predLock.Lock()
+	node.preNode = preNode
+	node.predLock.Unlock()
 	return emptyRequest, nil
 }
 
 // get the successor node and return it 为什么不需要传值就能拿node？
-func(n *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
-	n.succLock.RLock()
-	NextNode := n.successor
-	n.succLock.RUnlock()
+func(node *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+	node.succLock.RLock()
+	NextNode := node.successor
+	node.succLock.RUnlock()
 	if NextNode == nil {
 		return emptyNode, nil
 	}
@@ -170,19 +210,19 @@ func(n *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the successor node
-func(n *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error) {
-	n.succLock.Lock()
-	n.successor = NextNode
-	n.succLock.Unlock()
+func(node *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error) {
+	node.succLock.Lock()
+	node.successor = NextNode
+	node.succLock.Unlock()
 	return emptyRequest, nil
 }
 
-func(n *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
-	preNode, err := n.
+func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
+	preNode, err := node.
 }
 
 //
-func (n *Node) SetPreNodeRPC(node rpc.Node){
+func (node *Node) SetPreNodeRPC(node rpc.Node){
 
 }
 
