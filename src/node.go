@@ -328,33 +328,33 @@ func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rp
 
 // ---------------- Node Operations ---------------
 
-// getNextNodeRPC the successor ID of a remote node.
+// Get the previous node for current node
 func (node *Node) getNextNodeRPC(node1 *models.Node) (*models.Node, error) {
 	return node.connections.GetNextNode(node1)
 }
 
-// setNextNodeRPC sets the successor of a given node.
+// Set the next node for a given node
 func (node *Node) setNextNodeRPC(node1 *models.Node, nextNode *models.Node) error {
 	return node.connections.SetNextNode(node1, nextNode)
 }
 
-// findNextNodeRPC finds the successor node of a given ID in the entire ring.
-func (node *Node) findNextNodeRPC(node1 *models.Node, nodeId []byte) (*models.Node, error) {
-	return node.connections.FindNextNode(node1, nodeId)
+// Get the next node given an id
+func (node *Node) getNextNodeByIdRPC(node1 *models.Node, nodeId []byte) (*models.Node, error) {
+	return node.connections.GetNextNodeById(node1, nodeId)
 }
 
 // getNextNodeRPC the successor ID of a remote node.
-func (node *Node) getPredecessorRPC(node1 *models.Node) (*models.Node, error) {
-	return node.connections.GetPredecessor(node1)
+func (node *Node) getPreNodeRPC(node1 *models.Node) (*models.Node, error) {
+	return node.connections.GetPreNode(node1)
 }
 
-// setPredecessorRPC sets the predecessor of a given node.
-func (node *Node) setPredecessorRPC(node1 *models.Node, preNode *models.Node) error {
-	return node.connections.SetPredecessor(node1, preNode)
+// setPreNodeRPC sets the predecessor of a given node.
+func (node *Node) setPreNodeRPC(node1 *models.Node, preNode *models.Node) error {
+	return node.connections.SetPreNode(node1, preNode)
 }
 
 // Inform the node to be the previous node of current node
-func (node *Node) notifyRPC(node1, predNode *models.Node) error {
+func (node *Node) informRPC(node1, predNode *models.Node) error {
 	return node.connections.Inform(node1, preNode)
 }
 
@@ -375,7 +375,7 @@ func (node *Node) GetKeysRPC(node1 *models.Node, start []byte, end []byte) ([]*m
 	return node.connections.GetKeys(node1, start, end)
 }
 
-	// Delete a given key
+// Delete a given key
 func (node *Node) deleteKeyRPC(node1 *models.Node, key string) error {
 	return node.connections.DeleteKey(node1, key)
 }
