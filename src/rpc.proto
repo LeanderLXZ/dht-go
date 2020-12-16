@@ -84,16 +84,44 @@ message EmptyRequest {}
 // ================ Service ================
 
 service DistributedHashTable {
+
+	// ---------------- Key Operations ----------------
+
+	// Add a (key, value) pair
 	rpc AddKey(AddKeyReq) returns (AddKeyResp);
+
+	// Get the value given a key
 	rpc GetValue(GetValueReq) returns (GetValueResp);
+
+	// Get keys from a given range
 	rpc GetKeys(GetKeysReq) returns (GetKeysResp);
+
+	// Delete a given key
 	rpc DeleteKey(DeleteKeyReq) returns (DeleteKeyResp);
+
+	// Delete multiple keys
 	rpc DeleteKeys(DeleteKeysReq) returns (DeleteKeysResp);
+
+	// ---------------- Node Operations ---------------
+
+	// Set the previous node for a given node
 	rpc SetPreNode(Node) returns (EmptyRequest);
+
+	// Set the next node for a given node
 	rpc SetNextNode(Node) returns (EmptyRequest);
+
+	// Get the previous node for current node
 	rpc GetPreNode(EmptyRequest) returns (Node);
+
+	// Get the previous node for current node
 	rpc GetNextNode(EmptyRequest) returns (Node);
+
+	// Check whether the previous node is still connected
 	rpc CheckPreNodeById(NodeId) returns (EmptyRequest);
+
+	// Get the next node given an id
 	rpc GetNextNodeById(NodeId) returns (Node);
+
+	// Inform the node to be the previous node of current node
 	rpc Inform(Node) returns (EmptyRequest);
 }

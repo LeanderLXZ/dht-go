@@ -40,7 +40,7 @@ func GetInitialParameters() *Parameters {
 	return param
 }
 
-func(n *Node)join(newNode rpc.Node) error {
+func(node *Node)join(newNode rpc.Node) error {
 
 }
 
@@ -73,7 +73,7 @@ type Node struct {
 
 // ---------------- Node Operations ---------------
 
-// findSuccessor
+// findNextNode
 // reference from paper fig. 5
 func(n *node)findNextNode(nodeId []byte) (rpc.Node, error){
 	n.succLock.RLock()
@@ -95,10 +95,10 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 }
 
 
-// findSuccessor
+// findNextNode
 // reference from paper fig. 5
 // ask node n to find the successor of id
-func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
+func(node *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 	n.succLock.RLock()
 	defer n.succLock.RUnlock()
 	currNode := n.Node
@@ -119,13 +119,13 @@ func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 
 // Get the value given a key
 func (node *Node) getValue(key string) ([]byte, error) {
-
+	n, err := node.
 
 
 }
 
 
-func(n *Node)closestPreNode(nodeId []byte) (){
+func(node *Node)closestPreNode(nodeId []byte) (){
 
 }
 
@@ -137,7 +137,7 @@ func(n *Node)closestPreNode(nodeId []byte) (){
 
 
 // get the predecessor node and return it
-func(n *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+func(node *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 	n.predLock.RLock()
 	preNode := n.predecessor
 	n.predLock.RUnlock()
@@ -148,7 +148,7 @@ func(n *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the predecessor node 
-func(n *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) {
+func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) {
 	n.predLock.Lock()
 	n.preNode = preNode
 	n.predLock.Unlock()
@@ -156,7 +156,7 @@ func(n *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) 
 }
 
 // get the successor node and return it 为什么不需要传值就能拿node？
-func(n *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+func(node *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 	n.succLock.RLock()
 	NextNode := n.successor
 	n.succLock.RUnlock()
@@ -167,22 +167,86 @@ func(n *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the successor node
-func(n *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error) {
+func(node *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error) {
 	n.succLock.Lock()
 	n.successor = NextNode
 	n.succLock.Unlock()
 	return emptyRequest, nil
 }
 
-func(n *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
+func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
 	preNode, err := n.
 }
 
 //
-func (n *Node) SetPreNodeRPC(node rpc.Node){
+func (node *Node) SetPreNodeRPC(node rpc.Node){
 
 }
 
 // ---------------- Key Operations ----------------
 
 
+
+
+// ================================================
+//                  RPC Protocols
+// ================================================
+
+// ---------------- Node Operations ---------------
+
+// getNextNodeRPC the successor ID of a remote node.
+func (node *Node) getNextNodeRPC(node1 *models.Node) (*models.Node, error) {
+	return node.connections.GetNextNode(node1)
+}
+
+// setNextNodeRPC sets the successor of a given node.
+func (node *Node) setNextNodeRPC(node *models.Node, succ *models.Node) error {
+	return node.connections.SetNextNode(node, succ)
+}
+
+// findNextNodeRPC finds the successor node of a given ID in the entire ring.
+func (node *Node) findNextNodeRPC(node *models.Node, id []byte) (*models.Node, error) {
+	return node.connections.FindNextNode(node, id)
+}
+
+// getNextNodeRPC the successor ID of a remote node.
+func (node *Node) getPredecessorRPC(node *models.Node) (*models.Node, error) {
+	return node.connections.GetPredecessor(node)
+}
+
+// setPredecessorRPC sets the predecessor of a given node.
+func (node *Node) setPredecessorRPC(node *models.Node, pred *models.Node) error {
+	return node.connections.SetPredecessor(node, pred)
+}
+
+// Inform the node to be the previous node of current node
+func (node *Node) notifyRPC(node1, predNode *models.Node) error {
+	return node.connections.Inform(node1, pred)
+}
+
+// ---------------- Key Operations ----------------
+
+// Get the value given a key
+func (node *Node) getValueRPC(node1 *models.Node, key string) (*models.GetResponse, error) {
+	return node.connections.GetValue(node1, key)
+}
+
+// Add a (key, value) pair
+func (node *Node) addKeyRPC(node1 *models.Node, key, value string) error {
+	return node.connections.AddKey(node1, key, value)
+}
+
+// Get keys from a given range
+func (node *Node) GetKeysRPC(node1 *models.Node, start []byte, end []byte) ([]*models.KV, error) {
+	return node.connections.GetKeys(node1, start, end)
+}
+
+	// Delete a given key
+func (node *Node) deleteKeyRPC(node1 *models.Node, key string) error {
+	return node.connections.DeleteKey(node1, key)
+}
+
+// Delete multiple keys
+func (node *Node) deleteKeysRPC(node1 *models.Node, keys []string) error {
+	return node.connections.DeleteKeys(node1, keys)
+}
