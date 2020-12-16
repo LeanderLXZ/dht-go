@@ -14,39 +14,18 @@ import (
 type Parameters struct {
 	NodeID        string
 	Address       string
-	HashFunc      func() hash.Hash // Hash function
-	HashLen       int              // Length of hash
-	Timeout       time.Duration    // Timeout
-	MaxIdleTime   time.Duration    // Maximum idle time
-	MinStableTime time.Duration    // Minimum stable time
-	MaxStableTime time.Duration    // Maximum stable time
-	ServerOptions []grpc.ServerOption
-	DialOptions   []grpc.DialOption
+	HashFunc      func() hash.Hash 		// Hash function
+	HashLen       int              		// Length of hash
+	Timeout       time.Duration    		// Timeout
+	MaxIdleTime   time.Duration    		// Maximum idle time
+	MinStableTime time.Duration    		// Minimum stable time
+	MaxStableTime time.Duration    		// Maximum stable time
+	ServerOptions []grpc.ServerOption 	// grpc server option
+	DialOptions   []grpc.DialOption 	// grpc dial option
 }
-// structure for node
-type Node struct {
-	rpc.Node
-	para 			*Parameters
 
-	predecessor 	rpc.Node
-	predLock		sync.RWMutex
-
-	successor		rpc.Node
-	succLock		sync.RWMutex
-
-	fingerTable 	fingerTable
-	fingerLock		sync.RWMutex
-
-	storage 		Storage
-	stLock			sync.RWMutex
-
-	transport 		Transport
-	tsLock     		sync.RWMutex
-
-	lastStablized 	time.Time
-}
-// Get a default parameters settings
-func GetDefaultParameters() *Parameters {
+// Get a initial parameters settings
+func GetInitialParameters() *Parameters {
 	param := Parameters{}
 	param.HashFunc = sha1.New
 	param.HashLen = param.HashFunc.Size() * 8
@@ -65,19 +44,56 @@ func(n *Node)join(newNode rpc.Node) error {
 
 }
 
-/*
-	local methods
-*/
+// Structure of Node
+type Node struct {
+	rpc.Node
+	para 			*Parameters
+
+	predecessor 	rpc.Node
+	predLock		sync.RWMutex
+
+	successor		rpc.Node
+	succLock		sync.RWMutex
+
+	fingerTable 	fingerTable
+	fingerLock		sync.RWMutex
+
+	storage 		Storage
+	stLock			sync.RWMutex
+
+	connections 	Connections
+	tsLock     		sync.RWMutex
+
+	lastStablized 	time.Time
+}
+
+// ================================================
+//                  Local Methods
+// ================================================
+
+// ---------------- Node Operations ---------------
+
+// findSuccessor
+// reference from paper fig. 5
+func(n *node)findNextNode(nodeId []byte) (rpc.Node, error){
+	n.succLock.RLock()
+	defer n.succLock.RUnlock()
+
+}
+
+// ---------------- Key Operations ----------------
+
 // generate hash key
 // input ip address, output hash key (sha1)
-func (n *Node) hashKey(key string) ([]byte, error) {
-	h := n.cnf.Hash()
-	if _, err := h.Write([]byte(key)); err != nil {
+func (node *Node) getHashKey(key string) ([]byte, error) {
+	hash := node.cnf.Hash()
+	if _, err := hash.Write([]byte(key)); err != nil {
 		return nil, err
 	}
-	hk := h.Sum(nil)
-	return hk, nil
+	hashKey := hash.Sum(nil)
+	return hashKey, nil
 }
+
 
 // findSuccessor
 // reference from paper fig. 5
@@ -101,16 +117,25 @@ func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 		preNode := n.closestPreNode(nodeId)
 	}
 
+// Get the value given a key
+func (node *Node) getValue(key string) ([]byte, error) {
+
+
 
 }
+
 
 func(n *Node)closestPreNode(nodeId []byte) (){
 
 }
 
-/*
-	public methods
-*/
+// ================================================
+//                  Public Methods
+// ================================================
+
+// ---------------- Node Operations ---------------
+
+
 // get the predecessor node and return it
 func(n *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 	n.predLock.RLock()
@@ -152,7 +177,12 @@ func(n *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error)
 func(n *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
 	preNode, err := n.
 }
+
 //
 func (n *Node) SetPreNodeRPC(node rpc.Node){
 
 }
+
+// ---------------- Key Operations ----------------
+
+
