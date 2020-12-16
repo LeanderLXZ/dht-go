@@ -70,12 +70,12 @@ message DeleteKeyResp {}
 // ================ Delete Multiple keys ================
 
 // Delete multiple keys - Request
-message DeleteMultipleKeysReq {
+message DeleteKeysReq {
 	repeated string keys = 1;
 }
 
 // Delete multiple keys - Response
-message DeleteMultipleKeysResp {}
+message DeleteKeysResp {}
 
 // ================ Others ================
 
@@ -88,7 +88,7 @@ service DistributedHashTable {
 	rpc GetValue(GetValueReq) returns (GetValueResp);
 	rpc GetKeys(GetKeysReq) returns (GetKeysResp);
 	rpc DeleteKey(DeleteKeyReq) returns (DeleteKeyResp);
-	rpc DeleteMultipleKeys(DeleteMultipleKeysReq) returns (DeleteMultipleKeysResp);
+	rpc DeleteKeys(DeleteKeysReq) returns (DeleteKeysResp);
 	rpc SetPreNode(Node) returns (EmptyRequest);
 	rpc SetNextNode(Node) returns (EmptyRequest);
 	rpc GetPreNode(EmptyRequest) returns (Node);

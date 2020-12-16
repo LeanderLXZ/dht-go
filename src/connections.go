@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	emptyNode                = &models.Node{}
-	emptyRequest             = &models.ER{}
-	emptyGetResponse         = &models.GetResponse{}
-	emptySetResponse         = &models.SetResponse{}
-	emptyDeleteResponse      = &models.DeleteResponse{}
-	emptyRequestKeysResponse = &models.RequestKeysResponse{}
+	emptyNode            = &models.Node{}
+	emptyRequest         = &models.ER{}
+	emptyGetResponse     = &models.GetResponse{}
+	emptySetResponse     = &models.SetResponse{}
+	emptyDeleteResponse  = &models.DeleteResponse{}
+	emptyGetKeysResponse = &models.GetKeysResponse{}
 )
 
 func Dial(addr string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
@@ -40,7 +40,7 @@ type Connections interface {
 	GetValue(*models.Node, string) (*models.GetResponse, error)
 	AddKey(*models.Node, string, string) error
 	DeleteKey(*models.Node, string) error
-	RequestKeys(*models.Node, []byte, []byte) ([]*models.KV, error)
+	GetKeys(*models.Node, []byte, []byte) ([]*models.KV, error)
 	DeleteKeys(*models.Node, []string) error
 }
 
@@ -102,7 +102,7 @@ func (g *GrpcConnection) GetServer() *grpc.Server {
 	return g.server
 }
 
-func (g *GrpcConnection) getConn(addr string,) (models.ChordClient, error) {
+func (g *GrpcConnection) getConn(addr string) (models.ChordClient, error) {
 
 	g.poolMtx.RLock()
 
@@ -258,7 +258,7 @@ func (g *GrpcConnection) CheckPreNode(node *models.Node) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.CheckPreNode(ctx, &models.ID{Id: node.Id})
+	_, err = client.CheckPreNodeById(ctx, &models.ID{Id: node.Id})
 	return err
 }
 
@@ -282,7 +282,7 @@ func (g *GrpcConnection) AddKey(node *models.Node, key, value string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.XSet(ctx, &models.SetRequest{Key: key, Value: value})
+	_, err = client.AddKey(ctx, &models.SetRequest{Key: key, Value: value})
 	return err
 }
 
@@ -294,7 +294,7 @@ func (g *GrpcConnection) GetValue(node *models.Node, key string) (*models.GetRes
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	return client.XGet(ctx, &models.GetRequest{Key: key})
+	return client.GetValue(ctx, &models.GetRequest{Key: key})
 }
 
 func (g *GrpcConnection) DeleteKey(node *models.Node, key string) error {
@@ -305,7 +305,7 @@ func (g *GrpcConnection) DeleteKey(node *models.Node, key string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.XDelete(ctx, &models.DeleteRequest{Key: key})
+	_, err = client.DeleteKey(ctx, &models.DeleteRequest{Key: key})
 	return err
 }
 
@@ -317,13 +317,13 @@ func (g *GrpcConnection) DeleteKeys(node *models.Node, keys []string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.XMultiDelete(
+	_, err = client.DeleteKeys(
 		ctx, &models.MultiDeleteRequest{Keys: keys},
 	)
 	return err
 }
 
-func (g *GrpcConnection) RequestKeys(node *models.Node, from, to []byte) ([]*models.KV, error) {
+func (g *GrpcConnection) GetKeys(node *models.Node, from, to []byte) ([]*models.KV, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
@@ -331,8 +331,8 @@ func (g *GrpcConnection) RequestKeys(node *models.Node, from, to []byte) ([]*mod
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	val, err := client.XRequestKeys(
-		ctx, &models.RequestKeysRequest{From: from, To: to},
+	val, err := client.GetKeys(
+		ctx, &models.GetKeysRequest{From: from, To: to},
 	)
 	if err != nil {
 		return nil, err
