@@ -1,15 +1,15 @@
-package chord
+package src
 
 import (
 	"errors"
 	"fmt"
-	"models"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"net"
-	"sync"
+	sync "sync"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -29,16 +29,16 @@ type Connections interface {
 	Start() error
 	Stop() error
 
-	GetSuccessor(*models.Node) (*models.Node, error)
-	FindSuccessor(*models.Node, []byte) (*models.Node, error)
-	GetPredecessor(*models.Node) (*models.Node, error)
-	Notify(*models.Node, *models.Node) error
-	CheckPredecessor(*models.Node) error
-	SetPredecessor(*models.Node, *models.Node) error
-	SetSuccessor(*models.Node, *models.Node) error
+	GetNextNode(*models.Node) (*models.Node, error)
+	FindNextNode(*models.Node, []byte) (*models.Node, error)
+	GetPreNode(*models.Node) (*models.Node, error)
+	Inform(*models.Node, *models.Node) error
+	CheckPreNode(*models.Node) error
+	SetPreNode(*models.Node, *models.Node) error
+	SetNextNode(*models.Node, *models.Node) error
 
-	GetKey(*models.Node, string) (*models.GetResponse, error)
-	SetKey(*models.Node, string, string) error
+	GetValue(*models.Node, string) (*models.GetResponse, error)
+	AddKey(*models.Node, string, string) error
 	DeleteKey(*models.Node, string) error
 	RequestKeys(*models.Node, []byte, []byte) ([]*models.KV, error)
 	DeleteKeys(*models.Node, []string) error
@@ -77,7 +77,6 @@ func NewGrpcConnection(config *Config) (*GrpcConnection, error) {
 
 	pool := make(map[string]*grpcConn)
 
-	
 	grp := &GrpcConnection{
 		sock:    listener.(*net.TCPListener),
 		timeout: config.Timeout,
@@ -199,7 +198,7 @@ func (g *GrpcConnection) listen() {
 	g.server.Serve(g.sock)
 }
 
-func (g *GrpcConnection) GetSuccessor(node *models.Node) (*models.Node, error) {
+func (g *GrpcConnection) GetNextNode(node *models.Node) (*models.Node, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
@@ -207,10 +206,10 @@ func (g *GrpcConnection) GetSuccessor(node *models.Node) (*models.Node, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	return client.GetSuccessor(ctx, emptyRequest)
+	return client.GetNextNode(ctx, emptyRequest)
 }
 
-func (g *GrpcConnection) FindSuccessor(node *models.Node, id []byte) (*models.Node, error) {
+func (g *GrpcConnection) FindNextNode(node *models.Node, id []byte) (*models.Node, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
@@ -218,42 +217,42 @@ func (g *GrpcConnection) FindSuccessor(node *models.Node, id []byte) (*models.No
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	return client.FindSuccessor(ctx, &models.ID{Id: id})
+	return client.FindNextNode(ctx, &models.ID{Id: id})
 }
 
-func (g *GrpcConnection) GetPredecessor(node *models.Node) (*models.Node, error) {
+func (g *GrpcConnection) GetPreNode(node *models.Node) (*models.Node, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	return client.GetPredecessor(ctx, emptyRequest)
+	return client.GetPreNode(ctx, emptyRequest)
 }
 
-func (g *GrpcConnection) SetPredecessor(node *models.Node, pred *models.Node) error {
+func (g *GrpcConnection) SetPreNode(node *models.Node, pred *models.Node) error {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.SetPredecessor(ctx, pred)
+	_, err = client.SetPreNode(ctx, pred)
 	return err
 }
 
-func (g *GrpcConnection) SetSuccessor(node *models.Node, succ *models.Node) error {
+func (g *GrpcConnection) SetNextNode(node *models.Node, succ *models.Node) error {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.SetSuccessor(ctx, succ)
+	_, err = client.SetNextNode(ctx, succ)
 	return err
 }
 
-func (g *GrpcConnection) CheckPredecessor(node *models.Node) error {
+func (g *GrpcConnection) CheckPreNode(node *models.Node) error {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return err
@@ -261,23 +260,23 @@ func (g *GrpcConnection) CheckPredecessor(node *models.Node) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.CheckPredecessor(ctx, &models.ID{Id: node.Id})
+	_, err = client.CheckPreNode(ctx, &models.ID{Id: node.Id})
 	return err
 }
 
-func (g *GrpcConnection) Notify(node, pred *models.Node) error {
+func (g *GrpcConnection) Inform(node, pred *models.Node) error {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	_, err = client.Notify(ctx, pred)
+	_, err = client.Inform(ctx, pred)
 	return err
 
 }
 
-func (g *GrpcConnection) SetKey(node *models.Node, key, value string) error {
+func (g *GrpcConnection) AddKey(node *models.Node, key, value string) error {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return err
@@ -289,7 +288,7 @@ func (g *GrpcConnection) SetKey(node *models.Node, key, value string) error {
 	return err
 }
 
-func (g *GrpcConnection) GetKey(node *models.Node, key string) (*models.GetResponse, error) {
+func (g *GrpcConnection) GetValue(node *models.Node, key string) (*models.GetResponse, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
@@ -342,4 +341,3 @@ func (g *GrpcConnection) RequestKeys(node *models.Node, from, to []byte) ([]*mod
 	}
 	return val.Values, nil
 }
-
