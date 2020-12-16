@@ -66,6 +66,13 @@ type Node struct {
 
 	lastStablized 	time.Time
 }
+// ================================================
+//                  RPC Callers
+// ================================================
+
+func (n *Node) getSuccessorRPC(node rpc.Node) (rpc.Node, error) {
+	return n.transport.GetSuccessor(node)
+}
 
 // ================================================
 //                  Local Methods
@@ -73,11 +80,39 @@ type Node struct {
 
 // ---------------- Node Operations ---------------
 
-// findSuccessor
+//  -----------------------------------------------
+// 					findSuccessor 
 // reference from paper fig. 5
-func(n *node)findNextNode(nodeId []byte) (rpc.Node, error){
+// ask node n to find the successor of id
+//	-----------------------------------------------
+func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 	n.succLock.RLock()
 	defer n.succLock.RUnlock()
+	currNode := n.Node
+	succNode := n.successor
+	// if no succNode exists
+	if succNode == nil {
+		return currNode, nil
+	}
+	
+	var err error
+	// ask direct predecessor for node with nodeId, 
+	// if not found, then go to find closest preceding node of nodeId in fingertable. 
+	if betweenRightIncl(nodeId, currNode.nodeId, succNode.nodeId){
+		return succNode, nil
+	} else {
+		preNode := n.closestPreNode(nodeId)
+		return preNode.successor
+	}
+}
+
+// Get the value given a key
+func (node *Node) getValue(key string) ([]byte, error) {
+
+}
+
+
+func(n *Node)closestPreNode(nodeId []byte) (){
 
 }
 
@@ -95,39 +130,7 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 }
 
 
-// findSuccessor
-// reference from paper fig. 5
-// ask node n to find the successor of id
-func(n *Node)findNextNode(nodeId []byte) (rpc.Node, error){
-	n.succLock.RLock()
-	defer n.succLock.RUnlock()
-	currNode := n.Node
-	succNode := n.successor
 
-	// if 
-	if succNode == nil {
-		return currNode, nil
-	}
-
-	var err error
-
-	if betweenRightIncl(nodeId, currNode.nodeId, succNode.nodeId){
-		return succNode,nil
-	} else {
-		preNode := n.closestPreNode(nodeId)
-	}
-
-// Get the value given a key
-func (node *Node) getValue(key string) ([]byte, error) {
-
-
-
-}
-
-
-func(n *Node)closestPreNode(nodeId []byte) (){
-
-}
 
 // ================================================
 //                  Public Methods
