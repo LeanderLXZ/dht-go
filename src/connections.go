@@ -30,7 +30,7 @@ type Connections interface {
 	Stop() error
 
 	GetNextNode(*models.Node) (*models.Node, error)
-	FindNextNode(*models.Node, []byte) (*models.Node, error)
+	GetNextNodeById(*models.Node, []byte) (*models.Node, error)
 	GetPreNode(*models.Node) (*models.Node, error)
 	Inform(*models.Node, *models.Node) error
 	CheckPreNode(*models.Node) error
@@ -207,7 +207,7 @@ func (g *GrpcConnection) GetNextNode(node *models.Node) (*models.Node, error) {
 	return client.GetNextNode(ctx, emptyRequest)
 }
 
-func (g *GrpcConnection) FindNextNode(node *models.Node, id []byte) (*models.Node, error) {
+func (g *GrpcConnection) GetNextNodeById(node *models.Node, id []byte) (*models.Node, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
@@ -215,7 +215,7 @@ func (g *GrpcConnection) FindNextNode(node *models.Node, id []byte) (*models.Nod
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	return client.FindNextNode(ctx, &models.ID{Id: id})
+	return client.GetNextNodeById(ctx, &models.ID{Id: id})
 }
 
 func (g *GrpcConnection) GetPreNode(node *models.Node) (*models.Node, error) {

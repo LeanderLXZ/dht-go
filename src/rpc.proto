@@ -79,7 +79,7 @@ message DeleteMultipleKeysResp {}
 
 // ================ Others ================
 
-message ER {}
+message EmptyRequest {}
 
 // ================ Service ================
 
@@ -89,11 +89,11 @@ service DistributedHashTable {
 	rpc GetKeys(GetKeysReq) returns (GetKeysResp);
 	rpc DeleteKey(DeleteKeyReq) returns (DeleteKeyResp);
 	rpc DeleteMultipleKeys(DeleteMultipleKeysReq) returns (DeleteMultipleKeysResp);
-	rpc SetPreNode(Node) returns (ER);
-	rpc SetNextNode(Node) returns (ER);
-	rpc GetPreNode(ER) returns (Node);
-	rpc GetNextNode(ER) returns (Node);
-	rpc CheckPreNodeById(NodeId) returns (ER);
+	rpc SetPreNode(Node) returns (EmptyRequest);
+	rpc SetNextNode(Node) returns (EmptyRequest);
+	rpc GetPreNode(EmptyRequest) returns (Node);
+	rpc GetNextNode(EmptyRequest) returns (Node);
+	rpc CheckPreNodeById(NodeId) returns (EmptyRequest);
 	rpc GetNextNodeById(NodeId) returns (Node);
-	rpc Inform(Node) returns (ER);
+	rpc Inform(Node) returns (EmptyRequest);
 }
