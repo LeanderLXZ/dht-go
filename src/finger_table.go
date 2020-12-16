@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/project-schrodinger/models" //这个models我们还没加在框架里，后面需要加
+	"github.com/project-schrodinger/models" //这个models里的内容我们还没加在框架里，后面需要加
 )
 
 type fingerTable []*fingerEntry
