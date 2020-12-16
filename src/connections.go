@@ -1,4 +1,4 @@
-package chord
+package src
 
 import (
 	"errors"
@@ -103,9 +103,7 @@ func (g *GrpcConnection) GetServer() *grpc.Server {
 	return g.server
 }
 
-func (g *GrpcConnection) getConn(
-	addr string,
-) (models.ChordClient, error) {
+func (g *GrpcConnection) getConn(addr string,) (models.ChordClient, error) {
 
 	g.poolMtx.RLock()
 
