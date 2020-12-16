@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package src;
+
+// ================ Node ================
+
+// Structure of a Node
+message Node {
+	string address = 2;
+	bytes nodeId = 1;
+}
+
+// Node Id
+message NodeId {
+	bytes nodeId = 1;
+}
+
+// ================ Add Key ================
+
+// Add a (key, value) pair - Request
+message AddKeyReq {
+	string key = 1;
+	string value = 2;
+}
+
+// Add a (key, value) pair - Response
+message AddKeyResp {}
+
+// ================ Get Value ================
+
+// Get the value ginven a key - Request
+message GetValueReq {
+	string key = 1;
+}
+
+// Get the value ginven a key - Response
+message GetValueResp {
+	string value = 1;
+}
+
+// ================ Get Keys ================
+
+// Structure of (key, value) pairs
+message KeyValuePair {
+	string key = 1;
+	string value = 2;
+}
+
+// Get keys from a given range - Request
+message GetKeysReq {
+	bytes start = 1;
+	bytes end = 2;
+}
+
+// Get keys from a given range - Response
+message GetKeysResp {
+	repeated KeyValuePair kvs = 1;
+}
+
+// ================ Delete Key ================
+
+// Delete a given key - Request
+message DeleteKeyReq {
+	string key = 1;
+}
+
+// Delete a given key - Response
+message DeleteKeyResp {}
+
+// ================ Delete Multiple keys ================
+
+// Delete multiple keys - Request
+message DeleteKeysReq {
+	repeated string keys = 1;
+}
+
+// Delete multiple keys - Response
+message DeleteKeysResp {}
+
+// ================ Others ================
+
+message EmptyRequest {}
+
+// ================ Service ================
+
+service DistributedHashTable {
+	rpc AddKey(AddKeyReq) returns (AddKeyResp);
+	rpc GetValue(GetValueReq) returns (GetValueResp);
+	rpc GetKeys(GetKeysReq) returns (GetKeysResp);
+	rpc DeleteKey(DeleteKeyReq) returns (DeleteKeyResp);
+	rpc DeleteKeys(DeleteKeysReq) returns (DeleteKeysResp);
+	rpc SetPreNode(Node) returns (EmptyRequest);
+	rpc SetNextNode(Node) returns (EmptyRequest);
+	rpc GetPreNode(EmptyRequest) returns (Node);
+	rpc GetNextNode(EmptyRequest) returns (Node);
+	rpc CheckPreNodeById(NodeId) returns (EmptyRequest);
+	rpc GetNextNodeById(NodeId) returns (Node);
+	rpc Inform(Node) returns (EmptyRequest);
+}
