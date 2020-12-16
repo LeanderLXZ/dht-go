@@ -20,7 +20,7 @@ message NodeId {
 // Add a (key, value) pair - Request
 message AddKeyReq {
 	string key = 1;
-	sting value = 1;
+	string value = 2;
 }
 
 // Add a (key, value) pair - Response
