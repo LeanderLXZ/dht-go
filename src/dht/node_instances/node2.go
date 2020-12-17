@@ -4,7 +4,6 @@ import (
 	"dht"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
 	"os/signal"
 	"strconv"
@@ -21,12 +20,6 @@ func createNode(id string, addr string, sister *dht.NodeRPC) (*dht.Node, error) 
 
 	n, err := dht.CreateNode(p, sister)
 	return n, err
-}
-
-func createID(id string) []byte {
-	val := big.NewInt(0)
-	val.SetString(id, 10)
-	return val.Bytes()
 }
 
 func main() {
