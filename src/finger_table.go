@@ -7,7 +7,7 @@ import (
 
 type fingerTable []*fingerEntry
 
-func newFingerTable(node *models.Node, m int) fingerTable {
+func newFingerTable(node *NodeRPC, m int) fingerTable {
 	ft := make([]*fingerEntry, m)
 	for i := range ft {
 		ft[i] = newFingerEntry(FingerMath(node.NodeId, i, m), node)
@@ -18,10 +18,10 @@ func newFingerTable(node *models.Node, m int) fingerTable {
 
 type fingerEntry struct {
 	InitId     []byte
-	RemoteNode *models.Node
+	RemoteNode *NodeRPC
 }
 
-func newFingerEntry(initId []byte, remoteNode *models.Node) *fingerEntry {
+func newFingerEntry(initId []byte, remoteNode *NodeRPC) *fingerEntry {
 	return &fingerEntry{
 		InitId:     initId,
 		RemoteNode: remoteNode,
