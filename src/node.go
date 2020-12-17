@@ -45,9 +45,38 @@ func GetInitialParameters() *Parameters {
 	return para
 }
 
-func(node *Node)join(newNode NodeRPC) error {
+// join a new node
+func (node *Node) join(newNode NodeRPC) error {
+	// First check if node already present in the circle
+	// Join this node to the same chord ring as parent
+	var a NodeRPC
+	// // Ask if our id already exists on the ring.
+	if newNode != nil {
+		rtNode, err := node.getNextNodeByIdRPC(newNode, node.NodeId)
+		if err != nil {
+			return err
+		}
 
+		if isEqual(rtNode.NodeId, node.NodeId) {
+			return ERR_NODE_EXISTS
+		}
+		a = newNode
+	} else {
+		a = node.Node
+	}
+
+	succNode, err := node.getNextNodeByIdRPC(a, node.NodeId)
+	if err != nil {
+		return err
+	}
+	node.succLock.Lock()
+	node.successor = succNode
+	node.succLock.Unlock()
+
+	return nil
 }
+
+
 
 // Structure of Node
 type Node struct {
@@ -79,63 +108,6 @@ type Node struct {
 // ================================================
 
 // ---------------- Node Operations ---------------
-
-//  -----------------------------------------------
-// 					create a new node 
-// 	create a new node and peridoically stablize it
-// 			return error if node already exists		
-//	-----------------------------------------------
-func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
-	if err := para.Verify(); err != nil {
-		return nil, err
-	}
-
-	node := &Node {
-		Node:			new(NodeRPC),
-		closeCh:		make(chan struct{}),
-		para:			parameters,
-		dataStorage:	NewMapStore(para.HashFunc),
-	}
-
-	var nodeId string
-	if para.NodeID != "" {
-		nodeId = para.NodeID
-	} else {
-		nodeId = para.Address
-	}
-	hashId, err := node.getHashKey(nodeId)
-	if err != nil {
-		return nil, err
-	}
-
-	SInt := (&big.Int{}).SetBytes(hashId)
-	// fmt.Printf("new node id %d, \n", SInt)
-
-	node.Node.NodeId = nodeId
-	node.Node.Address = para.Address
-
-	// create fingertable for new node
-	node.fingerTable = newFingerTable(node.Node, para.HashLen)
-
-	// start RPC
-	connect, err = NewGrpcConnection(para)
-	if err != nil {
-		return nil, err
-	}
-	node.connections = connect
-
-	RegisterDistributedHashTableServer(connect.server, node)
-
-	node.connections.Start()
-
-	if err := node.join(newNode); err != nil {
-		return nil, err
-	}
-
-	newNodePeriod(node)
-
-	return node, nil
-}
 
 // node period to stablize, check the finger table, and check predecessor status
 func newNodePeriod(node *Node) {
@@ -387,7 +359,75 @@ func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 // ================================================
 
 // ---------------- Node Operations ---------------
+//  -----------------------------------------------
+// 					create a new node 
+// 	create a new node and peridoically stablize it
+// 			return error if node already exists		
+//	-----------------------------------------------
+func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
+	if err := para.Verify(); err != nil {
+		return nil, err
+	}
 
+	node := &Node {
+		Node:			new(NodeRPC),
+		closeCh:		make(chan struct{}),
+		para:			parameters,
+		dataStorage:	NewMapStore(para.HashFunc),
+	}
+
+	var nodeId string
+	if para.NodeID != "" {
+		nodeId = para.NodeID
+	} else {
+		nodeId = para.Address
+	}
+	hashId, err := node.getHashKey(nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	SInt := (&big.Int{}).SetBytes(hashId)
+	// fmt.Printf("new node id %d, \n", SInt)
+
+	node.Node.NodeId = nodeId
+	node.Node.Address = para.Address
+
+	// create fingertable for new node
+	node.fingerTable = newFingerTable(node.Node, para.HashLen)
+
+	// start RPC
+	connect, err = NewGrpcConnection(para)
+	if err != nil {
+		return nil, err
+	}
+	node.connections = connect
+
+	RegisterDistributedHashTableServer(connect.server, node)
+
+	node.connections.Start()
+
+	if err := node.join(newNode); err != nil {
+		return nil, err
+	}
+
+	newNodePeriod(node)
+
+	return node, nil
+}
+
+func NewInode(id string, addr string) *NodeRPC {
+	h := sha1.New()
+	if _, err := h.Write([]byte(id)); err != nil {
+		return nil
+	}
+	hk := h.Sum(nil)
+
+	return &NodeRPC{
+		NodeIdRPC:   hk,
+		address: addr,
+	}
+}
 
 // get the predecessor node and return it
 func(node *Node) GetPreNode(ctx context.Context, r EmptyRequest) (EmptyRequest, error) {
