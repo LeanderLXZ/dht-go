@@ -2,12 +2,10 @@ package main
 
 import (
 	"dht"
-	"fmt"
 	"log"
 	"math/big"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 )
 
@@ -31,40 +29,16 @@ func createID(id string) []byte {
 
 func main() {
 
-	id1 := "1"
-	sister := dht.CreateNodeById(id1, "0.0.0.0:8001")
+	joinNode := dht.CreateNodeById("4", "0.0.0.0:8002")
 
-	h, err := createNode("4", "0.0.0.0:8002", sister)
+	h, err := createNode("12", "0.0.0.0:8004", joinNode)
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
 
-	shut := make(chan bool)
-	var count int
-	time.Sleep(2000 * time.Millisecond)
-	go func() {
-		ticker := time.NewTicker(1000 * time.Millisecond)
-		for {
-			select {
-			case <-ticker.C:
-				count++
-				key := strconv.Itoa(count)
-				value := fmt.Sprintf("Hello, this is node2!")
-				sErr := h.AddKey(key, value)
-				if sErr != nil {
-					log.Println("err: ", sErr)
-				}
-			case <-shut:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
-
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
-	shut <- true
 	h.Stop()
 }
