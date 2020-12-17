@@ -53,7 +53,7 @@ func (node *Node) join(newNode *NodeRPC) error {
 	// Join this node to the same chord ring as parent
 	var a *NodeRPC
 	fmt.Println("----------------------------------------------------------------")
-	fmt.Println("Added a new node!")
+	fmt.Println("[Log] Added a new node!")
 	fmt.Printf("My Node ID:\n\t%d\n", (&big.Int{}).SetBytes(node.NodeId))
 	// // Ask if our id already exists on the ring.
 	if newNode != nil {
@@ -174,7 +174,7 @@ func (node *Node) stabilize() {
 		node.succLock.Unlock()
 		fmt.Println("----------------------------------------------------------------")
 		fmt.Printf(
-			"[Set successor]\n\tof: %d\n\tto be: %d\n",
+			"[Log] Set successor\n\tof: %d\n\tto be: %d\n",
 			(&big.Int{}).SetBytes(node.NodeId),
 			(&big.Int{}).SetBytes(n.NodeId),
 		)
@@ -288,13 +288,19 @@ func (node *Node) getLocation(key string) (*NodeRPC, error) {
 		return nil, err
 	}
 	nextNode, err := node.findNextNode(nodeId)
+	fmt.Println("----------------------------------------------------------------")
+	fmt.Printf(
+		"[Command] Get the location of a key: %s\n\tHashKey: %d\n\tLocation: %d\n",
+		key,
+		(&big.Int{}).SetBytes(nodeId),
+		(&big.Int{}).SetBytes(nextNode.NodeId),
+	)
 	return nextNode, err
 }
 
 // Add a (key, value) pair
 func (node *Node) addKey(key, value string) error {
 	node1, err := node.getLocation(key)
-	// fmt.Sprintf("key %s, location %x", key, node1.NodeId)
 	if err != nil {
 		return err
 	}
@@ -305,7 +311,7 @@ func (node *Node) addKey(key, value string) error {
 		return errhk
 	} else {
 		fmt.Printf(
-			"[Operation] Add a new key:\n\t(%s, \"%s\")\n\tHashKey: %d\n\tFrom: %d\n\tTo: %d\n",
+			"[Command] Add a new key:\n\t(%s, \"%s\")\n\tHashKey: %d\n\tFrom: %d\n\tTo: %d\n",
 			key,
 			value,
 			(&big.Int{}).SetBytes(hk),
@@ -326,12 +332,13 @@ func (node *Node) getValue(key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("----------------------------------------------------------------")
 	hk, errhk := node.getHashKey(key)
 	if errhk != nil {
 		return nil, errhk
 	} else {
 		fmt.Printf(
-			"[Operation] Get the value of a key: %s\n\tHashKey: %d\n\tFrom: %d\n\tValue: %d\n",
+			"[Command] Get the value of a key: %s\n\tHashKey: %d\n\tFrom: %d\n\tValue: %s\n",
 			key,
 			(&big.Int{}).SetBytes(hk),
 			(&big.Int{}).SetBytes(node1.NodeId),
@@ -347,12 +354,13 @@ func (node *Node) deleteKey(key string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("----------------------------------------------------------------")
 	hk, errhk := node.getHashKey(key)
 	if errhk != nil {
 		return errhk
 	} else {
 		fmt.Printf(
-			"[Operation] Delete a key: %s\n\tHashKey: %d\n\tFrom: %d\n",
+			"[Command] Delete a key: %s\n\tHashKey: %d\n\tFrom: %d\n",
 			key,
 			(&big.Int{}).SetBytes(hk),
 			(&big.Int{}).SetBytes(node1.NodeId),
@@ -412,7 +420,7 @@ func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 
 	fmt.Println("----------------------------------------------------------------")
-	fmt.Printf("Created a new node:\n\tAddress: %s\n\tInitial Node ID: %s\n", para.NodeId, para.Address)
+	fmt.Printf("[Log] Created a new node\n\tAddress: %s\n\tInitial Node ID: %s\n", para.Address, para.NodeId)
 
 	if err := para.Verify(); err != nil {
 		return nil, err
@@ -541,7 +549,7 @@ func (node *Node) Inform(ctx context.Context, n *NodeRPC) (*EmptyRequest, error)
 	if predNode == nil || between(n.NodeId, predNode.NodeId, node.NodeId) {
 		fmt.Println("----------------------------------------------------------------")
 		fmt.Printf(
-			"[Set predecessor]\n\tof: %d\n\tto be: %d\n",
+			"[Log] Set predecessor\n\tof: %d\n\tto be: %d\n",
 			(&big.Int{}).SetBytes(n.NodeId),
 			(&big.Int{}).SetBytes(node.NodeId),
 		)
@@ -598,7 +606,7 @@ func (node *Node) AddKeyHT(ctx context.Context, req *AddKeyReq) (*AddKeyResp, er
 	defer node.stLock.RUnlock()
 	err := node.dataStorage.AddKey(req.Key, req.Value)
 	fmt.Println("----------------------------------------------------------------")
-	fmt.Printf("Received a new (key, value) pair:\n\t(%s, \"%s\")\n", req.Key, req.Value)
+	fmt.Printf("[Log] Received a new (key, value) pair:\n\t(%s, \"%s\")\n", req.Key, req.Value)
 	fmt.Printf("My Node ID:\n\t%d\n", (&big.Int{}).SetBytes(node.NodeId))
 	// fmt.Printf("My successor:\n\t%d\n", (&big.Int{}).SetBytes(node.successor.NodeId))
 	return emptyAddKeyResp, err
