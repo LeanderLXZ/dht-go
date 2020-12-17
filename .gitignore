@@ -2,4 +2,6 @@
 ._*
 .vscode/
 bin/
-*.sh
+pkgbk/*
+src/*
+!src/dht/*
