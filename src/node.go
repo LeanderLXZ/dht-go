@@ -7,7 +7,7 @@ import (
 	"time"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	rpc "./rpc.pb.go"
+	rpc "rpc.pb.go"
 	"math/big"
 )
 
@@ -158,7 +158,7 @@ func newNodePeriod(node *Node) {
 		for {
 			select {
 			case <-ticker.C:
-				next = node.fixFinger(next)
+				next = node.findNextFinger(next)
 			case <-node.shutdownCh:
 				ticker.Stop()
 				return
@@ -178,6 +178,47 @@ func newNodePeriod(node *Node) {
 		}
 	}()
 }
+
+func (node *Node) stabilize() {
+	node.succLock.RLock()
+	succNode := node.Successor
+	if succNode == nil {
+		node.succLock.RLock()
+		return
+	}
+	node.succLock.RUnlock()
+
+	n, err := node.getPreNodeRPC(succNode)
+	if err != nil || n == nil {
+		fmt.Println("error getting predecessor, ", err, n)
+		return
+	}
+
+	if n.Id != nil && between(n.Id, node.Id, succNode.Id) {
+		node.succLock.Lock()
+		node.successor = n
+		node.succLock.Unlock()
+	}
+	node.informRPC(succNode, node.Node)
+}
+
+func (node *Node) CheckPreNode() {
+	// implement using rpc func
+	node.predLock.RLock()
+	predNode := node.predecessor
+	node.predLock.RUnlock()
+
+	if predNode != nil {
+		err := n.connections.CheckPreNode(predNode)
+		if err != nil {
+			fmt.Println("predecessor failed!", err)
+			node.predLock.Lock()
+			node.predecessor = nil
+			node.predLock.Unlock()
+		}
+	}
+}
+
 
 //  -----------------------------------------------
 // 					find Successor 
@@ -223,11 +264,6 @@ func(node *Node) findNextNode(nodeId []byte) (rpc.Node, error){
 		return succNode, nil
 	}
 	return nil, nil
-}
-
-// Get the value given a key
-func (node *Node) getValue(key string) ([]byte, error) {
-
 }
 
 //  -----------------------------------------------
@@ -355,7 +391,7 @@ func (node *Node) changeKeys(preNode, nextNode *models.Node) {
 
 
 // get the predecessor node and return it
-func(node *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+func(node *Node) GetPreNode(ctx context.Context, r rpc.EmptyRequest) (rpc.EmptyRequest, error) {
 	node.predLock.RLock()
 	preNode := node.predecessor
 	node.predLock.RUnlock()
@@ -366,15 +402,15 @@ func(node *Node) GetPreNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the predecessor node 
-func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.ER, error) {
+func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.EmptyRequest, error) {
 	node.predLock.Lock()
 	node.preNode = preNode
 	node.predLock.Unlock()
 	return emptyRequest, nil
 }
 
-// get the successor node and return it 为什么不需要传值就能拿node？
-func(node *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
+// get the successor node and return it 
+func(node *Node) GetNextNode(ctx context.Context, r rpc.EmptyRequest) (rpc.EmptyRequest, error) {
 	node.succLock.RLock()
 	NextNode := node.successor
 	node.succLock.RUnlock()
@@ -385,7 +421,7 @@ func(node *Node) GetNextNode(ctx context.Context, r rpc.ER) (rpc.ER, error) {
 }
 
 // set the successor node
-func(node *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, error) {
+func(node *Node) SetNextNode(ctx context.Context, NextNode rpc.Node) (rpc.EmptyRequest, error) {
 	node.succLock.Lock()
 	node.successor = NextNode
 	node.succLock.Unlock()
@@ -393,7 +429,46 @@ func(node *Node) SetPreNode(ctx context.Context, NextNode rpc.Node) (rpc.ER, err
 }
 
 func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
-	preNode, err := node.
+	return emptyRequest, nil
+}
+
+func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (rpc.Node, error) {
+	succNode, err := node.findNextNode(nodeId.NodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	if succ == nil {
+		return nil, ERR_NO_SUCCESSOR
+	}
+
+	return succ, nil
+
+}
+
+func (node *Node) Inform(ctx context.Context, n rpc.Node) (rpc.emptyRequest, error) {
+	node.predLock.Lock()
+	defer node.predMtx.Unlock()
+	var prevNode rpc.Node
+
+	predNode := node.predecessor
+	if predNode == nil || between(node.Id, predNode.Id, node.nodeId) {
+		// fmt.Println("setting predecessor", n.Id, node.Id)
+		if n.predecessor != nil {
+			prevNode = n.predecessor
+		}
+		n.predecessor = node
+
+		// transfer keys from parent node
+		if prevNode != nil {
+			if between(n.predecessor.Id, prevNode.Id, n.Id) {
+				n.transferKeys(prevPredNode, n.predecessor)
+			}
+		}
+
+	}
+
+	return emptyRequest, nil
 }
 
 // ---------------- Key Operations ----------------
