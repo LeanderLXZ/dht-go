@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	rpc "./rpc.pb.go"
+	"math/big"
 )
 
 // Structure for parameters
@@ -22,6 +23,11 @@ type Parameters struct {
 	MaxStableTime time.Duration    		// Maximum stable time
 	ServerOptions []grpc.ServerOption 	// grpc server option
 	DialOptions   []grpc.DialOption 	// grpc dial option
+}
+
+// hashsize bigger than hash func size
+func (para *Parameters) Verify() erro {
+	return nil
 }
 
 // Get a initial parameters settings
@@ -49,6 +55,8 @@ type Node struct {
 	rpc.Node
 	para 			*Parameters
 
+	closeCh			chan struct{}
+
 	predecessor 	rpc.Node
 	predLock		sync.RWMutex
 
@@ -58,7 +66,7 @@ type Node struct {
 	fingerTable 	fingerTable
 	fingerLock		sync.RWMutex
 
-	storage 		Storage
+	dataStorage 	Storage
 	stLock			sync.RWMutex
 
 	connections 	Connections
@@ -72,6 +80,104 @@ type Node struct {
 // ================================================
 
 // ---------------- Node Operations ---------------
+
+//  -----------------------------------------------
+// 					create a new node 
+// 	create a new node and peridoically stablize it
+// 			return error if node already exists		
+//	-----------------------------------------------
+func CreateNode(para *Parameters, newNode rpc.Node) (*Node, error) {
+	if err := para.Verify(); err != nil {
+		return nil, err
+	}
+
+	node := &Node {
+		Node:			new(rpc.Node),
+		closeCh:		make(chan struct{}),
+		para:			parameters,
+		dataStorage:	NewMapStore(para.HashFunc),
+	}
+
+	var nodeId string
+	if para.NodeID != "" {
+		nodeId = para.NodeID
+	} else {
+		nodeId = para.Address
+	}
+	hashId, err := node.getHashKey(nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	SInt := (&big.Int{}).SetBytes(hashId)
+	// fmt.Printf("new node id %d, \n", SInt)
+
+	node.Node.nodeId = nodeId
+	node.Node.Address = para.Address
+
+	// create fingertable for new node
+	node.fingerTable = newFingerTable(node.Node, para.HashLen)
+
+	// start RPC
+	connect, err = NewGrpcConnection(para)
+	if err != nil {
+		return nil, err
+	}
+	node.connections = connect
+
+	rpc.RegisterDistributedHashTableServer(connect.server, node)
+
+	node.connections.Start()
+
+	if err := node.join(newNode); err != nil {
+		return nil, err
+	}
+
+	newNodePeriod(node)
+
+	return node, nil
+}
+
+// node period to stablize, check the finger table, and check predecessor status
+func newNodePeriod(node *Node) {
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				node.stabilize()
+			case <-node.shutdownCh:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+	go func() {
+		next := 0
+		ticker := time.NewTicker(100 * time.Millisecond)
+		for {
+			select {
+			case <-ticker.C:
+				next = node.fixFinger(next)
+			case <-node.shutdownCh:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				node.checkPredecessor()
+			case <-node.shutdownCh:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+}
 
 //  -----------------------------------------------
 // 					find Successor 
