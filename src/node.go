@@ -78,7 +78,7 @@ type Node struct {
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
-func(node *Node)findNextNode(nodeId []byte) (rpc.Node, error){
+func(node *Node) findNextNode(nodeId []byte) (rpc.Node, error){
 	node.succLock.RLock()
 	defer node.succLock.RUnlock()
 	currNode := node.Node
@@ -97,7 +97,7 @@ func(node *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 	} else {
 		preNode := node.closestPreNode(nodeId)
 		if isEqual(preNode.nodeId, node.NodeID){
-			succNode, err = node.getSuccessorRPC(preNode)
+			succNode, err = node.getNextNodeRPC(preNode)
 			if err != nil {
 				return nil, err
 			}
@@ -107,7 +107,7 @@ func(node *Node)findNextNode(nodeId []byte) (rpc.Node, error){
 			return succNode, nil
 		}
 
-		succNode, err := node.findSuccessorRPC(preNode, nodeId)
+		succNode, err := node.getNextNodeByIdRPC(preNode, nodeId)
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +129,7 @@ func (node *Node) getValue(key string) ([]byte, error) {
 // search the local table for the highest predecessor of id
 // in fingerTable.
 //	-----------------------------------------------
-func(node *Node)closestPreNode(nodeId []byte) (){
+func(node *Node) closestPreNode(nodeId []byte) (){
 	node.predLock.RLock()
 	defer node.predLock.RUnlock()
 
@@ -158,6 +158,86 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 	}
 	hashKey := hash.Sum(nil)
 	return hashKey, nil
+}
+
+// get the location of a given key
+func (node *Node) getLocation(key string) (*models.Node, error) {
+	nodeId, err := node.hashKey(key)
+	if err != nil {
+		return nil, err
+	}
+	nextNode, err := node.findNextNode(nodeId)
+	return nextNode, err
+}
+
+// Add a (key, value) pair
+func (node *Node) addKey(key, value string) error {
+	node1, err := node.getLocation(key)
+	if err != nil {
+		return err
+	}
+	err = node.addKeyRPC(node1, key, value)
+	return err
+}
+
+// get the value of a given key
+func (node *Node) getValue(key string) ([]byte, error) {
+	node1, err := node.locate(key)
+	if err != nil {
+		return nil, err
+	}
+	value, err := node.getValueRPC(node1, key)
+	if err != nil {
+		return nil, err
+	}
+	return value.Value, nil
+}
+
+// Delete a given key
+func (node *Node) deleteKey(key string) error {
+	node1, err := node.getLocation(key)
+	if err != nil {
+		return err
+	}
+	err = node.deleteKeyRPC(node1, key)
+	return err
+}
+
+// When a new node is added to the ring, it gets the keys from the next node
+func (node *Node) getKeys(preNode, nextNode *models.Node) ([]*models.KV, error) {
+	if isEqual(node.nodeId, nextNode.nodeId) {
+		return nil, nil
+	}
+	return node.getKeysRPC(
+		nextNode, preNode.nodeId, node.nodeId,
+	)
+}
+
+// delete given keys from the given model
+func (node *Node) deleteKeys(node1 *models.Node, keys []string) error {
+	return node.deleteKeysRPC(node1, keys)
+}
+
+// change the location of the keys
+func (node *Node) changeKeys(preNode, nextNode *models.Node) {
+
+	keys, err := node.getKeys(preNode, nextNode)
+	if len(keys) > 0 {
+		fmt.Println("Changing the location of key: ", keys, err)
+	}
+	keysDeleted := make([]string, 0, 10)
+	for _, kv := range keys {
+		if kv == nil {
+			continue
+		}
+		node.storage.AddKey(kv.Key, kv.Value)
+		keysDeleted = append(keysDeleted, kv.Key)
+	}
+	// delete keys from next node
+	if len(keysDeleted) > 0 {
+		node.deleteKeys(nextNode, keysDeleted)
+	}
+
 }
 
 
@@ -210,10 +290,21 @@ func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rp
 	preNode, err := node.
 }
 
-
 // ---------------- Key Operations ----------------
 
+func (node *Node) GetLocation(key string) (*models.Node, error) {
+	return node.getLocation(key)
+}
 
+func (node *Node) GetValue(key string) ([]byte, error) {
+	return node.getValue(key)
+}
+func (node *Node) AddKey(key, value string) error {
+	return node.addKey(key, value)
+}
+func (node *Node) DeleteKey(key string) error {
+	return node.deleteKey(key)
+}
 
 
 // ================================================
@@ -222,14 +313,19 @@ func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rp
 
 // ---------------- Node Operations ---------------
 
-// Get the previous node for current node
-func (node *Node) getNextNodeRPC(node1 *models.Node) (*models.Node, error) {
-	return node.connections.GetNextNode(node1)
+// Get the previous node of current node
+func (node *Node) getPreNodeRPC(node1 *models.Node) (*models.Node, error) {
+	return node.connections.GetPreNode(node1)
 }
 
-// Set the next node for a given node
-func (node *Node) setNextNodeRPC(node1 *models.Node, nextNode *models.Node) error {
-	return node.connections.SetNextNode(node1, nextNode)
+// Set the previous node for a given node
+func (node *Node) setPreNodeRPC(node1 *models.Node, preNode *models.Node) error {
+	return node.connections.SetPreNode(node1, preNode)
+}
+
+// Get the next node of current node
+func (node *Node) GetNextNodeRPC(node1 *models.Node) (*models.Node, error) {
+	return node.connections.GetNextNode(node1)
 }
 
 // Get the next node given an id
@@ -237,14 +333,9 @@ func (node *Node) getNextNodeByIdRPC(node1 *models.Node, nodeId []byte) (*models
 	return node.connections.GetNextNodeById(node1, nodeId)
 }
 
-// getNextNodeRPC the successor ID of a remote node.
-func (node *Node) getPreNodeRPC(node1 *models.Node) (*models.Node, error) {
-	return node.connections.GetPreNode(node1)
-}
-
-// setPreNodeRPC sets the predecessor of a given node.
-func (node *Node) setPreNodeRPC(node1 *models.Node, preNode *models.Node) error {
-	return node.connections.SetPreNode(node1, preNode)
+// Set the next node of a given node
+func (node *Node) setNextNodeRPC(node1 *models.Node, nextNode *models.Node) error {
+	return node.connections.SetNextNode(node1, nextNode)
 }
 
 // Inform the node to be the previous node of current node

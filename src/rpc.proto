@@ -104,16 +104,16 @@ service DistributedHashTable {
 
 	// ---------------- Node Operations ---------------
 
-	// Set the previous node for a given node
+	// Set the previous node of a given node
 	rpc SetPreNode(Node) returns (EmptyRequest);
 
-	// Set the next node for a given node
+	// Set the next node of a given node
 	rpc SetNextNode(Node) returns (EmptyRequest);
 
-	// Get the previous node for current node
+	// Get the previous node of current node
 	rpc GetPreNode(EmptyRequest) returns (Node);
 
-	// Get the previous node for current node
+	// Get the next node of current node
 	rpc GetNextNode(EmptyRequest) returns (Node);
 
 	// Check whether the previous node is still connected
