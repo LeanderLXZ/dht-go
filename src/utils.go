@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ERR_NO_SUCCESSOR  = errors.New("cannot find successor")
+	ERR_NO_NEXT_NODE  = errors.New("cannot find next node")
 	ERR_NODE_EXISTS   = errors.New("node with id already exists")
 	ERR_KEY_NOT_FOUND = errors.New("key not found")
 )
