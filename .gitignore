@@ -3,5 +3,5 @@
 .vscode/
 pkg/
 bin/
-src/src/
+src/src/*
 *.sh

@@ -1,20 +1,20 @@
 package src
 
-import(
+import (
 	"hash"
 )
 
 type file interface {
-	Get(string) ([]byte, error)
-	Set(string, string) error
-	Delete(string) error
+	GetValue(string) ([]byte, error)
+	AddKey(string, string) error
+	DeleteKey(string) error
 	Between([]byte, []byte) ([]*KeyValuePair, error)
-	MDelete(...string) error
+	DeleteKeys(...string) error
 }
 
 type DataHash struct {
 	data map[string]string
-	Hash func() hash.Hash 
+	Hash func() hash.Hash
 }
 
 func NewDataHash(hashFunc func() hash.Hash) file {
@@ -75,5 +75,3 @@ func (dh *DataHash) Between(from []byte, to []byte) ([]*KeyValuePair, error) {
 	}
 	return values, nil
 }
-
-

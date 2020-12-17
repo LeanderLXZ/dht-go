@@ -35,7 +35,7 @@ message GetValueReq {
 
 // Get the value ginven a key - Response
 message GetValueResp {
-	string value = 1;
+	bytes value = 1;
 }
 
 // ================ Get Keys ================
@@ -88,19 +88,19 @@ service DistributedHashTable {
 	// ---------------- Key Operations ----------------
 
 	// Add a (key, value) pair
-	rpc AddKey(AddKeyReq) returns (AddKeyResp);
+	rpc AddKeyHT(AddKeyReq) returns (AddKeyResp);
 
 	// Get the value given a key
-	rpc GetValue(GetValueReq) returns (GetValueResp);
+	rpc GetValueHT(GetValueReq) returns (GetValueResp);
 
 	// Get keys from a given range
-	rpc GetKeys(GetKeysReq) returns (GetKeysResp);
+	rpc GetKeysHT(GetKeysReq) returns (GetKeysResp);
 
 	// Delete a given key
-	rpc DeleteKey(DeleteKeyReq) returns (DeleteKeyResp);
+	rpc DeleteKeyHT(DeleteKeyReq) returns (DeleteKeyResp);
 
 	// Delete multiple keys
-	rpc DeleteKeys(DeleteKeysReq) returns (DeleteKeysResp);
+	rpc DeleteKeysHT(DeleteKeysReq) returns (DeleteKeysResp);
 
 	// ---------------- Node Operations ---------------
 

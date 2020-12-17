@@ -13,12 +13,13 @@ import (
 )
 
 var (
-	emptyNode            = &NodeRPC{}
-	emptyRequest         = &EmptyRequest{}
-	emptyGetValueResp     = &GetValueResp{}
+	emptyNode           = &NodeRPC{}
+	emptyRequest        = &EmptyRequest{}
+	emptyGetValueResp   = &GetValueResp{}
 	emptyAddKeyResp     = &AddKeyResp{}
-	emptyDeleteResponse  = &DeleteKeyResp{}
-	emptyGetKeysResponse = &GetKeysResp{}
+	emptyDeleteKeyResp  = &DeleteKeyResp{}
+	emptyDeleteKeysResp = &DeleteKeysResp{}
+	emptyGetKeysResp    = &GetKeysResp{}
 )
 
 type Connections interface {
@@ -270,7 +271,7 @@ func (g *GrpcConnection) AddKey(node *NodeRPC, key, value string) error {
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.AddKey(ctx, &AddKeyReq{Key: key, Value: value})
+		_, err = client.AddKeyHT(ctx, &AddKeyReq{Key: key, Value: value})
 		return err
 	}
 	return err
@@ -281,7 +282,7 @@ func (g *GrpcConnection) GetValue(node *NodeRPC, key string) (*GetValueResp, err
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetValue(ctx, &GetValueReq{Key: key})
+		return client.GetValueHT(ctx, &GetValueReq{Key: key})
 	}
 	return nil, err
 }
@@ -291,7 +292,7 @@ func (g *GrpcConnection) DeleteKey(node *NodeRPC, key string) error {
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.DeleteKey(ctx, &DeleteKeyReq{Key: key})
+		_, err = client.DeleteKeyHT(ctx, &DeleteKeyReq{Key: key})
 		return err
 	}
 	return err
@@ -302,7 +303,7 @@ func (g *GrpcConnection) DeleteKeys(node *NodeRPC, keys []string) error {
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.DeleteKeys(
+		_, err = client.DeleteKeysHT(
 			ctx, &DeleteKeysReq{Keys: keys},
 		)
 		return err
@@ -310,7 +311,7 @@ func (g *GrpcConnection) DeleteKeys(node *NodeRPC, keys []string) error {
 	return err
 }
 
-func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KeyValuePair, error) {
+func (g *GrpcConnection) GetKeys(node *NodeRPC, from, to []byte) ([]*KeyValuePair, error) {
 	client, err := g.getConn(node.Address)
 	if err != nil {
 		return nil, err
@@ -318,7 +319,7 @@ func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KeyValuePair, 
 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
-	val, err := client.GetKeys(
+	val, err := client.GetKeysHT(
 		ctx, &GetKeysReq{Start: from, End: to},
 	)
 	if err != nil {
