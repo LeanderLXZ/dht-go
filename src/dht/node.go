@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"hash"
+	"math/big"
 	"sync"
 	"time"
 
@@ -51,6 +52,9 @@ func (node *Node) join(newNode *NodeRPC) error {
 	// First check if node already present in the circle
 	// Join this node to the same chord ring as parent
 	var a *NodeRPC
+	fmt.Println("----------------------------------------------------------------")
+	fmt.Println("Added a new node!")
+	fmt.Printf("My Node ID:\n\t%d\n", (&big.Int{}).SetBytes(node.NodeId))
 	// // Ask if our id already exists on the ring.
 	if newNode != nil {
 		rtNode, err := node.getNextNodeByIdRPC(newNode, node.NodeId)
@@ -111,7 +115,7 @@ type Node struct {
 // node period to stablize, check the finger table, and check predecessor status
 func newNodePeriod(node *Node) {
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(1000 * time.Millisecond)
 		for {
 			select {
 			case <-ticker.C:
@@ -168,6 +172,12 @@ func (node *Node) stabilize() {
 		node.succLock.Lock()
 		node.successor = n
 		node.succLock.Unlock()
+		fmt.Println("----------------------------------------------------------------")
+		fmt.Printf(
+			"[Set successor]\n\tof: %d\n\tto be: %d\n",
+			(&big.Int{}).SetBytes(node.NodeId),
+			(&big.Int{}).SetBytes(n.NodeId),
+		)
 	}
 	node.informRPC(succNode, node.NodeRPC)
 }
@@ -284,10 +294,25 @@ func (node *Node) getLocation(key string) (*NodeRPC, error) {
 // Add a (key, value) pair
 func (node *Node) addKey(key, value string) error {
 	node1, err := node.getLocation(key)
+	// fmt.Sprintf("key %s, location %x", key, node1.NodeId)
 	if err != nil {
 		return err
 	}
 	err = node.addKeyRPC(node1, key, value)
+	fmt.Println("----------------------------------------------------------------")
+	hk, errhk := node.getHashKey(key)
+	if errhk != nil {
+		return errhk
+	} else {
+		fmt.Printf(
+			"Add a new key:\n\t(%s, \"%s\")\n\tHashKey: %d\n\tFrom: %d\n\tTo: %d\n",
+			key,
+			value,
+			(&big.Int{}).SetBytes(hk),
+			(&big.Int{}).SetBytes(node.NodeId),
+			(&big.Int{}).SetBytes(node1.NodeId),
+		)
+	}
 	return err
 }
 
@@ -362,6 +387,10 @@ func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 // 			return error if node already exists
 //	-----------------------------------------------
 func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
+
+	fmt.Println("----------------------------------------------------------------")
+	fmt.Printf("Created a new node:\n\tAddress: %s\n\tInitial Node ID: %s\n", para.NodeId, para.Address)
+
 	if err := para.Verify(); err != nil {
 		return nil, err
 	}
@@ -383,6 +412,7 @@ func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("\tNew Node ID: %d\n", (&big.Int{}).SetBytes(hashId))
 
 	node.NodeRPC.NodeId = hashId
 	node.NodeRPC.Address = para.Address
@@ -401,7 +431,8 @@ func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 
 	node.connections.Start()
 
-	if err := node.join(newNode); err != nil {
+	err = node.join(newNode)
+	if err != nil {
 		return nil, err
 	}
 
@@ -410,7 +441,7 @@ func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 	return node, nil
 }
 
-func NewInode(id string, addr string) *NodeRPC {
+func CreateNodeById(id string, addr string) *NodeRPC {
 	h := sha1.New()
 	if _, err := h.Write([]byte(id)); err != nil {
 		return nil
@@ -483,10 +514,14 @@ func (node *Node) Inform(ctx context.Context, n *NodeRPC) (*EmptyRequest, error)
 	node.predLock.Lock()
 	defer node.predLock.Unlock()
 	var prevNode *NodeRPC
-
 	predNode := node.predecessor
-	if predNode == nil || between(node.NodeId, predNode.NodeId, node.NodeId) {
-		// fmt.Println("setting predecessor", n.Id, node.Id)
+	if predNode == nil || between(n.NodeId, predNode.NodeId, node.NodeId) {
+		fmt.Println("----------------------------------------------------------------")
+		fmt.Printf(
+			"[Set predecessor]\n\tof: %d\n\tto be: %d\n",
+			(&big.Int{}).SetBytes(n.NodeId),
+			(&big.Int{}).SetBytes(node.NodeId),
+		)
 		if node.predecessor != nil {
 			prevNode = node.predecessor
 		}
@@ -539,6 +574,10 @@ func (node *Node) AddKeyHT(ctx context.Context, req *AddKeyReq) (*AddKeyResp, er
 	node.stLock.RLock()
 	defer node.stLock.RUnlock()
 	err := node.dataStorage.AddKey(req.Key, req.Value)
+	fmt.Println("----------------------------------------------------------------")
+	fmt.Printf("Received a new (key, value) pair:\n\t(%s, \"%s\")\n", req.Key, req.Value)
+	fmt.Printf("My Node ID:\n\t%d\n", (&big.Int{}).SetBytes(node.NodeId))
+	// fmt.Printf("My successor:\n\t%d\n", (&big.Int{}).SetBytes(node.successor.NodeId))
 	return emptyAddKeyResp, err
 }
 

@@ -15,7 +15,7 @@ func createNode(id string, addr string, sister *dht.NodeRPC) (*dht.Node, error) 
 	p.NodeId = id
 	p.Address = addr
 	p.Timeout = 10 * time.Millisecond
-	p.MaxIdleTime = 100 * time.Millisecond
+	p.MaxIdleTime = 1000 * time.Millisecond
 
 	n, err := dht.CreateNode(p, sister)
 	return n, err
