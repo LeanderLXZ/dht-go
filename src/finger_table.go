@@ -32,7 +32,7 @@ func (node *Node) findNextFinger(next int) int {
 	nextHash := FingerMath(node.NodeId, next, node.para.HashLen)
 	nextOne, errors := node.findNextNode(nextHash)
 	nextNum := (next + 1) % node.para.HashLen
-	if err != nil || nextOne == nil {
+	if errors != nil || nextOne == nil {
 		fmt.Println("error: ", errors, nextOne)
 		fmt.Printf("finger lookup failed %x %x \n", node.NodeId, nextHash)
 		return nextNum

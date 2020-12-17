@@ -14,11 +14,11 @@ import (
 
 var (
 	emptyNode            = &NodeRPC{}
-	emptyRequest         = &ER{}
-	emptyGetResponse     = &GetResponse{}
-	emptySetResponse     = &SetResponse{}
-	emptyDeleteResponse  = &DeleteResponse{}
-	emptyGetKeysResponse = &GetKeysResponse{}
+	emptyRequest         = &EmptyRequest{}
+	emptyGetValueResp     = &GetValueResp{}
+	emptyAddKeyResp     = &AddKeyResp{}
+	emptyDeleteResponse  = &DeleteKeyResp{}
+	emptyGetKeysResponse = &GetKeysResp{}
 )
 
 type Connections interface {
@@ -33,7 +33,7 @@ type Connections interface {
 	SetPreNode(*NodeRPC, *NodeRPC) error
 	SetNextNode(*NodeRPC, *NodeRPC) error
 
-	GetValue(*NodeRPC, string) (*GetResponse, error)
+	GetValue(*NodeRPC, string) (*GetValueResp, error)
 	AddKey(*NodeRPC, string, string) error
 	DeleteKey(*NodeRPC, string) error
 	GetKeys(*NodeRPC, []byte, []byte) ([]*KeyValuePair, error)
@@ -41,7 +41,7 @@ type Connections interface {
 }
 
 type GrpcConnection struct {
-	config *Config
+	config *Parameters
 
 	timeout time.Duration
 	maxIdle time.Duration
@@ -58,7 +58,7 @@ type GrpcConnection struct {
 
 type grpcConn struct {
 	addr       string
-	client     ChordClient
+	client     DistributedHashTableClient
 	conn       *grpc.ClientConn
 	lastActive time.Time
 }
@@ -67,20 +67,20 @@ func Dial(addr string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	return grpc.Dial(addr, opts...)
 }
 
-func NewGrpcConnection(config *Config) (*GrpcConnection, error) {
+func NewGrpcConnection(p *Parameters) (*GrpcConnection, error) {
 
-	address := config.Addr
+	address := p.Address
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return nil, err
 	}
 	grp := &GrpcConnection{}
 	grp.sock = listener.(*net.TCPListener)
-	grp.timeout = config.Timeout
-	grp.maxIdle = config.MaxIdle
+	grp.timeout = p.Timeout
+	grp.maxIdle = p.MaxIdleTime
 	grp.pool = make(map[string]*grpcConn)
-	grp.config = config
-	grp.server = grpc.NewServer(config.ServerOpts...)
+	grp.config = p
+	grp.server = grpc.NewServer(p.ServerOptions...)
 
 	return grp, nil
 }
@@ -90,14 +90,14 @@ func (g *grpcConn) Close() {
 }
 
 func (g *GrpcConnection) registerNode(node *Node) {
-	RegisterChordServer(g.server, node)
+	RegisterDistributedHashTableServer(g.server, node)
 }
 
 func (g *GrpcConnection) GetServer() *grpc.Server {
 	return g.server
 }
 
-func (g *GrpcConnection) getConn(addr string) (ChordClient, error) {
+func (g *GrpcConnection) getConn(addr string) (DistributedHashTableClient, error) {
 
 	g.poolRWM.RLock()
 
@@ -114,12 +114,12 @@ func (g *GrpcConnection) getConn(addr string) (ChordClient, error) {
 
 	var conn *grpc.ClientConn
 	var err error
-	conn, err = Dial(addr, g.config.DialOpts...)
+	conn, err = Dial(addr, g.config.DialOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	client := NewChordClient(conn)
+	client := NewDistributedHashTableClient(conn)
 	gc = &grpcConn{addr, client, conn, time.Now()}
 	g.poolRWM.Lock()
 	if g.pool == nil {
@@ -192,7 +192,7 @@ func (g *GrpcConnection) listen() {
 }
 
 func (g *GrpcConnection) GetNextNode(node *NodeRPC) (*NodeRPC, error) {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
@@ -202,17 +202,17 @@ func (g *GrpcConnection) GetNextNode(node *NodeRPC) (*NodeRPC, error) {
 }
 
 func (g *GrpcConnection) GetNextNodeById(node *NodeRPC, id []byte) (*NodeRPC, error) {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetNextNodeById(ctx, &ID{Id: id})
+		return client.GetNextNodeById(ctx, &NodeIdRPC{NodeId: id})
 	}
 	return nil, err
 }
 
 func (g *GrpcConnection) GetPreNode(node *NodeRPC) (*NodeRPC, error) {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
@@ -222,7 +222,7 @@ func (g *GrpcConnection) GetPreNode(node *NodeRPC) (*NodeRPC, error) {
 }
 
 func (g *GrpcConnection) SetPreNode(node *NodeRPC, pred *NodeRPC) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
@@ -233,7 +233,7 @@ func (g *GrpcConnection) SetPreNode(node *NodeRPC, pred *NodeRPC) error {
 }
 
 func (g *GrpcConnection) SetNextNode(node *NodeRPC, succ *NodeRPC) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
@@ -244,18 +244,18 @@ func (g *GrpcConnection) SetNextNode(node *NodeRPC, succ *NodeRPC) error {
 }
 
 func (g *GrpcConnection) CheckPreNode(node *NodeRPC) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.CheckPreNodeById(ctx, &ID{Id: node.NodeId})
+		_, err = client.CheckPreNodeById(ctx, &NodeIdRPC{NodeId: node.NodeId})
 		return err
 	}
 	return err
 }
 
 func (g *GrpcConnection) Inform(node, pred *NodeRPC) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
@@ -266,44 +266,44 @@ func (g *GrpcConnection) Inform(node, pred *NodeRPC) error {
 }
 
 func (g *GrpcConnection) AddKey(node *NodeRPC, key, value string) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.AddKey(ctx, &SetRequest{Key: key, Value: value})
+		_, err = client.AddKey(ctx, &AddKeyReq{Key: key, Value: value})
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) GetValue(node *NodeRPC, key string) (*GetResponse, error) {
-	client, err := g.getConn(node.Addr)
+func (g *GrpcConnection) GetValue(node *NodeRPC, key string) (*GetValueResp, error) {
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetValue(ctx, &GetRequest{Key: key})
+		return client.GetValue(ctx, &GetValueReq{Key: key})
 	}
 	return nil, err
 }
 
 func (g *GrpcConnection) DeleteKey(node *NodeRPC, key string) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.DeleteKey(ctx, &DeleteRequest{Key: key})
+		_, err = client.DeleteKey(ctx, &DeleteKeyReq{Key: key})
 		return err
 	}
 	return err
 }
 
 func (g *GrpcConnection) DeleteKeys(node *NodeRPC, keys []string) error {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
 		_, err = client.DeleteKeys(
-			ctx, &MultiDeleteRequest{Keys: keys},
+			ctx, &DeleteKeysReq{Keys: keys},
 		)
 		return err
 	}
@@ -311,7 +311,7 @@ func (g *GrpcConnection) DeleteKeys(node *NodeRPC, keys []string) error {
 }
 
 func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KeyValuePair, error) {
-	client, err := g.getConn(node.Addr)
+	client, err := g.getConn(node.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -319,10 +319,10 @@ func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KeyValuePair, 
 	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
 	val, err := client.GetKeys(
-		ctx, &GetKeysRequest{From: from, To: to},
+		ctx, &GetKeysReq{Start: from, End: to},
 	)
 	if err != nil {
 		return nil, err
 	}
-	return val.Values, nil
+	return val.Kvs, nil
 }

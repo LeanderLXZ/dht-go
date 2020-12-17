@@ -5,7 +5,7 @@ import(
 )
 
 type file interface {
-	Get(string) ([]byte， error)
+	Get(string) ([]byte, error)
 	Set(string, string) error
 	Delete(string) error
 	Between([]byte, []byte) ([]*KeyValuePair, error)

@@ -5,6 +5,7 @@ import (
 	"hash"
 	"sync"
 	"time"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"math/big"
@@ -31,25 +32,25 @@ func (para *Parameters) Verify() error {
 
 // Get a initial parameters settings
 func GetInitialParameters() *Parameters {
-	para := Parameters{}
+	para := &Parameters{}
 	para.HashFunc = sha1.New
-	para.HashLen = param.HashFunc.Size() * 8
-	para.DialOptions = make([grpc.DialOption, 0, 5])
+	para.HashLen = para.HashFunc().Size() * 8
+	para.DialOptions = make([]grpc.DialOption,0,5)
 	para.DialOptions = append(
-		param.DialOptions,
-		grpc.WithBloc(),
+		para.DialOptions,
+		grpc.WithBlock(),
 		grpc.WithTimeout(5*time.Second),
 		grpc.FailOnNonTempDialError(true),
-		grpc.WithInsecure()
+		grpc.WithInsecure(),
 	)
 	return para
 }
 
 // join a new node
-func (node *Node) join(newNode NodeRPC) error {
+func (node *Node) join(newNode *NodeRPC) error {
 	// First check if node already present in the circle
 	// Join this node to the same chord ring as parent
-	var a NodeRPC
+	var a *NodeRPC
 	// // Ask if our id already exists on the ring.
 	if newNode != nil {
 		rtNode, err := node.getNextNodeByIdRPC(newNode, node.NodeId)
@@ -62,7 +63,7 @@ func (node *Node) join(newNode NodeRPC) error {
 		}
 		a = newNode
 	} else {
-		a = node.Node
+		a = node.NodeRPC
 	}
 
 	succNode, err := node.getNextNodeByIdRPC(a, node.NodeId)
@@ -80,21 +81,21 @@ func (node *Node) join(newNode NodeRPC) error {
 
 // Structure of Node
 type Node struct {
-	NodeRPC
+	*NodeRPC
 	para 			*Parameters
 
 	closeCh			chan struct{}
 
-	predecessor 	NodeRPC
+	predecessor 	*NodeRPC
 	predLock		sync.RWMutex
 
-	successor		NodeRPC
+	successor		*NodeRPC
 	succLock		sync.RWMutex
 
 	fingerTable 	fingerTable
 	fingerLock		sync.RWMutex
 
-	dataStorage 	Storage
+	dataStorage 	file
 	stLock			sync.RWMutex
 
 	connections 	Connections
@@ -117,7 +118,7 @@ func newNodePeriod(node *Node) {
 			select {
 			case <-ticker.C:
 				node.stabilize()
-			case <-node.shutdownCh:
+			case <-node.closeCh:
 				ticker.Stop()
 				return
 			}
@@ -130,7 +131,7 @@ func newNodePeriod(node *Node) {
 			select {
 			case <-ticker.C:
 				next = node.findNextFinger(next)
-			case <-node.shutdownCh:
+			case <-node.closeCh:
 				ticker.Stop()
 				return
 			}
@@ -141,8 +142,8 @@ func newNodePeriod(node *Node) {
 		for {
 			select {
 			case <-ticker.C:
-				node.checkPredecessor()
-			case <-node.shutdownCh:
+				node.CheckPreNode()
+			case <-node.closeCh:
 				ticker.Stop()
 				return
 			}
@@ -152,7 +153,7 @@ func newNodePeriod(node *Node) {
 
 func (node *Node) stabilize() {
 	node.succLock.RLock()
-	succNode := node.Successor
+	succNode := node.successor
 	if succNode == nil {
 		node.succLock.RLock()
 		return
@@ -165,12 +166,12 @@ func (node *Node) stabilize() {
 		return
 	}
 
-	if n.Id != nil && between(n.Id, node.Id, succNode.Id) {
+	if n.NodeId != nil && between(n.NodeId, node.NodeId, succNode.NodeId) {
 		node.succLock.Lock()
 		node.successor = n
 		node.succLock.Unlock()
 	}
-	node.informRPC(succNode, node.Node)
+	node.informRPC(succNode, node.NodeRPC)
 }
 
 func (node *Node) CheckPreNode() {
@@ -180,7 +181,7 @@ func (node *Node) CheckPreNode() {
 	node.predLock.RUnlock()
 
 	if predNode != nil {
-		err := n.connections.CheckPreNode(predNode)
+		err := node.connections.CheckPreNode(predNode)
 		if err != nil {
 			fmt.Println("predecessor failed!", err)
 			node.predLock.Lock()
@@ -196,10 +197,10 @@ func (node *Node) CheckPreNode() {
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
-func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
+func(node *Node) findNextNode(nodeId []byte) (*NodeRPC, error){
 	node.succLock.RLock()
 	defer node.succLock.RUnlock()
-	currNode := node.Node
+	currNode := node.NodeRPC
 	succNode := node.successor
 
 	// if no succNode exists
@@ -210,11 +211,11 @@ func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
 	var err error
 	// ask direct predecessor for node with nodeId, 
 	// if not found, then go to find closest preceding node of nodeId in fingertable. 
-	if betweenRightIncl(nodeId, currNode.nodeId, succNode.nodeId){
+	if betweenRightIncl(nodeId, currNode.NodeId, succNode.NodeId){
 		return succNode, nil
 	} else {
 		preNode := node.closestPreNode(nodeId)
-		if isEqual(preNode.nodeId, node.NodeId){
+		if isEqual(preNode.NodeId, node.NodeId){
 			succNode, err = node.getNextNodeRPC(preNode)
 			if err != nil {
 				return nil, err
@@ -229,7 +230,7 @@ func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
 		if err != nil {
 			return nil, err
 		}
-		if succ == nil {
+		if succNode == nil {
 			return currNode, nil
 		}
 		return succNode, nil
@@ -242,19 +243,19 @@ func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
 // search the local table for the highest predecessor of id
 // in fingerTable.
 //	-----------------------------------------------
-func(node *Node) closestPreNode(nodeId []byte) (){
+func(node *Node) closestPreNode(nodeId []byte) *NodeRPC {
 	node.predLock.RLock()
 	defer node.predLock.RUnlock()
 
-	currNode := node.Node
+	currNode := node.NodeRPC
 
-	for i := len(node.finferTable) - 1; i>=0; i-- {
+	for i := len(node.fingerTable) - 1; i>=0; i-- {
 		v := node.fingerTable[i]
-		if v == nil || v.Node == nil {
+		if v == nil || v.RemoteNode == nil {
 			continue
 		}
-		if between(v.nodeId, currNode,nodeId, nodeId) {
-			return v.Node
+		if between(v.InitId, currNode.NodeId, nodeId) {
+			return v.RemoteNode
 		}
 	}
 	return currNode
@@ -265,7 +266,7 @@ func(node *Node) closestPreNode(nodeId []byte) (){
 // generate hash key
 // input ip address, output hash key (sha1)
 func (node *Node) getHashKey(key string) ([]byte, error) {
-	hash := node.cnf.Hash()
+	hash := node.para.HashFunc()
 	if _, err := hash.Write([]byte(key)); err != nil {
 		return nil, err
 	}
@@ -275,7 +276,7 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 
 // get the location of a given key
 func (node *Node) getLocation(key string) (*NodeRPC, error) {
-	nodeId, err := node.hashKey(key)
+	nodeId, err := node.getHashKey(key)
 	if err != nil {
 		return nil, err
 	}
@@ -318,11 +319,11 @@ func (node *Node) deleteKey(key string) error {
 
 // When a new node is added to the ring, it gets the keys from the next node
 func (node *Node) getKeys(preNode, nextNode *NodeRPC) ([]KeyValuePair, error) {
-	if isEqual(node.nodeId, nextNode.NodeId) {
+	if isEqual(node.NodeId, nextNode.NodeId) {
 		return nil, nil
 	}
 	return node.getKeysRPC(
-		nextNode, preNode.nodeId, node.nodeId,
+		nextNode, preNode.NodeId, node.NodeId,
 	)
 }
 
@@ -364,7 +365,7 @@ func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 // 	create a new node and peridoically stablize it
 // 			return error if node already exists		
 //	-----------------------------------------------
-func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
+func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 	if err := para.Verify(); err != nil {
 		return nil, err
 	}
@@ -390,11 +391,11 @@ func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
 	SInt := (&big.Int{}).SetBytes(hashId)
 	// fmt.Printf("new node id %d, \n", SInt)
 
-	node.Node.NodeId = nodeId
-	node.Node.Address = para.Address
+	node.NodeRPC.NodeId = nodeId
+	node.NodeRPC.Address = para.Address
 
 	// create fingertable for new node
-	node.fingerTable = newFingerTable(node.Node, para.HashLen)
+	node.fingerTable = newFingerTable(node.NodeRPC, para.HashLen)
 
 	// start RPC
 	connect, err = NewGrpcConnection(para)
@@ -441,7 +442,7 @@ func(node *Node) GetPreNode(ctx context.Context, r EmptyRequest) (EmptyRequest, 
 }
 
 // set the predecessor node 
-func(node *Node) SetPreNode(ctx context.Context, preNode NodeRPC) (EmptyRequest, error) {
+func(node *Node) SetPreNode(ctx context.Context, preNode *NodeRPC) (EmptyRequest, error) {
 	node.predLock.Lock()
 	node.preNode = preNode
 	node.predLock.Unlock()
@@ -460,18 +461,18 @@ func(node *Node) GetNextNode(ctx context.Context, r EmptyRequest) (EmptyRequest,
 }
 
 // set the successor node
-func(node *Node) SetNextNode(ctx context.Context, NextNode NodeRPC) (EmptyRequest, error) {
+func(node *Node) SetNextNode(ctx context.Context, NextNode *NodeRPC) (EmptyRequest, error) {
 	node.succLock.Lock()
 	node.successor = NextNode
 	node.succLock.Unlock()
 	return emptyRequest, nil
 }
 
-func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId NodeIdRPC) (NodeRPC, error) {
+func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId NodeIdRPC) (*NodeRPC, error) {
 	return emptyRequest, nil
 }
 
-func(node *Node) GetNextNodeById(ctx context.context, nodeId NodeIdRPC) (NodeRPC, error) {
+func(node *Node) GetNextNodeById(ctx context.Context, nodeId NodeIdRPC) (*NodeRPC, error) {
 	succNode, err := node.findNextNode(nodeId.NodeId)
 	if err != nil {
 		return nil, err
@@ -485,13 +486,13 @@ func(node *Node) GetNextNodeById(ctx context.context, nodeId NodeIdRPC) (NodeRPC
 
 }
 
-func (node *Node) Inform(ctx context.Context, n NodeRPC) (EmptyRequest, error) {
+func (node *Node) Inform(ctx context.Context, n *NodeRPC) (EmptyRequest, error) {
 	node.predLock.Lock()
 	defer node.predMtx.Unlock()
-	var prevNode NodeRPC
+	var prevNode *NodeRPC
 
 	predNode := node.predecessor
-	if predNode == nil || between(node.Id, predNode.Id, node.nodeId) {
+	if predNode == nil || between(node.Id, predNode.Id, node.NodeId) {
 		// fmt.Println("setting predecessor", n.Id, node.Id)
 		if n.predecessor != nil {
 			prevNode = n.predecessor
@@ -546,7 +547,7 @@ func (node *Node) setPreNodeRPC(node1 *NodeRPC, preNode *NodeRPC) error {
 }
 
 // Get the next node of current node
-func (node *Node) GetNextNodeRPC(node1 *NodeRPC) (*NodeRPC, error) {
+func (node *Node) getNextNodeRPC(node1 *NodeRPC) (*NodeRPC, error) {
 	return node.connections.GetNextNode(node1)
 }
 
@@ -578,7 +579,7 @@ func (node *Node) addKeyRPC(node1 *NodeRPC, key, value string) error {
 }
 
 // Get keys from a given range
-func (node *Node) GetKeysRPC(node1 *NodeRPC, start []byte, end []byte) ([]KeyValuePair, error) {
+func (node *Node) getKeysRPC(node1 *NodeRPC, start []byte, end []byte) ([]KeyValuePair, error) {
 	return node.connections.GetKeys(node1, start, end)
 }
 
