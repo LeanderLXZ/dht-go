@@ -1,4 +1,4 @@
-package src
+package dht
 
 import (
 	"crypto/sha1"
@@ -564,6 +564,31 @@ func (node *Node) DeleteKeysHT(ctx context.Context, req *DeleteKeysReq) (*Delete
 	defer node.stLock.RUnlock()
 	err := node.dataStorage.DeleteKeys(req.Keys...)
 	return emptyDeleteKeysResp, err
+}
+
+// ================================================
+//                      Stop
+// ================================================
+
+func (node *Node) Stop() {
+	close(node.closeCh)
+
+	node.succLock.RLock()
+	nextNode := node.successor
+	node.succLock.RUnlock()
+
+	node.predLock.RLock()
+	preNode := node.predecessor
+	node.predLock.RUnlock()
+
+	if node.NodeRPC.Address != nextNode.Address && preNode != nil {
+		node.changeKeys(preNode, nextNode)
+		predErr := node.setPreNodeRPC(nextNode, preNode)
+		succErr := node.setNextNodeRPC(preNode, nextNode)
+		fmt.Println("Errors occurred and stop: ", predErr, succErr)
+	}
+
+	node.connections.Stop()
 }
 
 // ================================================

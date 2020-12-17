@@ -1,7 +1,7 @@
 package main
 
 import (
-	"src"
+	"dht"
 	"log"
 	"math/big"
 	"os"
@@ -9,15 +9,15 @@ import (
 	"time"
 )
 
-func createNode(id string, addr string, sister *src.NodeRPC) (*src.Node, error) {
+func createNode(id string, addr string, sister *dht.NodeRPC) (*dht.Node, error) {
 
-	p := src.Parameters()
-	p.Id = id
-	p.Addr = addr
+	p := dht.GetInitialParameters()
+	p.NodeId = id
+	p.Address = addr
 	p.Timeout = 10 * time.Millisecond
-	p.MaxIdle = 100 * time.Millisecond
+	p.MaxIdleTime = 100 * time.Millisecond
 
-	n, err := src.NewNode(p, sister)
+	n, err := dht.CreateNode(p, sister)
 	return n, err
 }
 

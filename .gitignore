@@ -1,7 +1,5 @@
 *.DS_Store
 ._*
 .vscode/
-pkg/
 bin/
-src/src/*
 *.sh
