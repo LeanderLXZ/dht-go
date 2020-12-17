@@ -32,18 +32,18 @@ func (para *Parameters) Verify() erro {
 
 // Get a initial parameters settings
 func GetInitialParameters() *Parameters {
-	param := Parameters{}
-	param.HashFunc = sha1.New
-	param.HashLen = param.HashFunc.Size() * 8
-	param.DialOptions = make([grpc.DialOption, 0, 5])
-	param.DialOptions = append(
+	para := Parameters{}
+	para.HashFunc = sha1.New
+	para.HashLen = param.HashFunc.Size() * 8
+	para.DialOptions = make([grpc.DialOption, 0, 5])
+	para.DialOptions = append(
 		param.DialOptions,
 		grpc.WithBloc(),
 		grpc.WithTimeout(5*time.Second),
 		grpc.FailOnNonTempDialError(true),
 		grpc.WithInsecure()
 	)
-	return param
+	return para
 }
 
 func(node *Node)join(newNode rpc.Node) error {
@@ -112,7 +112,7 @@ func CreateNode(para *Parameters, newNode rpc.Node) (*Node, error) {
 	SInt := (&big.Int{}).SetBytes(hashId)
 	// fmt.Printf("new node id %d, \n", SInt)
 
-	node.Node.nodeId = nodeId
+	node.Node.NodeId = nodeId
 	node.Node.Address = para.Address
 
 	// create fingertable for new node
@@ -180,7 +180,7 @@ func newNodePeriod(node *Node) {
 }
 
 //  -----------------------------------------------
-// 					find Successor 
+// 					findNextNode
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
@@ -288,7 +288,7 @@ func (node *Node) addKey(key, value string) error {
 
 // get the value of a given key
 func (node *Node) getValue(key string) ([]byte, error) {
-	node1, err := node.locate(key)
+	node1, err := node.getLocation(key)
 	if err != nil {
 		return nil, err
 	}
@@ -405,13 +405,15 @@ func (node *Node) GetLocation(key string) (*models.Node, error) {
 func (node *Node) GetValue(key string) ([]byte, error) {
 	return node.getValue(key)
 }
+
 func (node *Node) AddKey(key, value string) error {
 	return node.addKey(key, value)
 }
+
+// Delete a given key
 func (node *Node) DeleteKey(key string) error {
 	return node.deleteKey(key)
 }
-
 
 // ================================================
 //                  RPC Protocols
