@@ -7,7 +7,6 @@ import (
 	"time"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	rpc "rpc.pb.go"
 	"math/big"
 )
 
