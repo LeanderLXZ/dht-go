@@ -4,7 +4,6 @@ import (
 	"dht"
 	"fmt"
 	"log"
-	"math/big"
 	"os"
 	"os/signal"
 	"strconv"
@@ -23,12 +22,6 @@ func createNode(id string, addr string, sister *dht.NodeRPC) (*dht.Node, error) 
 	return n, err
 }
 
-func createID(id string) []byte {
-	val := big.NewInt(0)
-	val.SetString(id, 10)
-	return val.Bytes()
-}
-
 func main() {
 
 	id1 := "1"
@@ -42,9 +35,9 @@ func main() {
 
 	shut := make(chan bool)
 	var count int
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	go func() {
-		ticker := time.NewTicker(2000 * time.Millisecond)
+		ticker := time.NewTicker(1000 * time.Millisecond)
 		for {
 			select {
 			case <-ticker.C:

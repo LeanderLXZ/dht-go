@@ -305,7 +305,7 @@ func (node *Node) addKey(key, value string) error {
 		return errhk
 	} else {
 		fmt.Printf(
-			"Add a new key:\n\t(%s, \"%s\")\n\tHashKey: %d\n\tFrom: %d\n\tTo: %d\n",
+			"[Operation] Add a new key:\n\t(%s, \"%s\")\n\tHashKey: %d\n\tFrom: %d\n\tTo: %d\n",
 			key,
 			value,
 			(&big.Int{}).SetBytes(hk),
@@ -326,6 +326,18 @@ func (node *Node) getValue(key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	hk, errhk := node.getHashKey(key)
+	if errhk != nil {
+		return nil, errhk
+	} else {
+		fmt.Printf(
+			"[Operation] Get the value of a key: %s\n\tHashKey: %d\n\tFrom: %d\n\tValue: %d\n",
+			key,
+			(&big.Int{}).SetBytes(hk),
+			(&big.Int{}).SetBytes(node1.NodeId),
+			string(value.Value),
+		)
+	}
 	return value.Value, nil
 }
 
@@ -334,6 +346,17 @@ func (node *Node) deleteKey(key string) error {
 	node1, err := node.getLocation(key)
 	if err != nil {
 		return err
+	}
+	hk, errhk := node.getHashKey(key)
+	if errhk != nil {
+		return errhk
+	} else {
+		fmt.Printf(
+			"[Operation] Delete a key: %s\n\tHashKey: %d\n\tFrom: %d\n",
+			key,
+			(&big.Int{}).SetBytes(hk),
+			(&big.Int{}).SetBytes(node1.NodeId),
+		)
 	}
 	err = node.deleteKeyRPC(node1, key)
 	return err

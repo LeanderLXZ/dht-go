@@ -6,8 +6,6 @@ import (
 	"log"
 	"math/big"
 	"os"
-	//"os/signal"
-	//"strconv"
 	"time"
 	"bufio"
 	"strings"
@@ -70,7 +68,11 @@ func main()  {
 			fmt.Println(val)
 		}
 		if array[0] == "getloc"{
-			val, err := h.GetLo
+			node, err := h.GetLocation(array[1])
+			if err != nil{
+				log.Println("err: ", err)
+			}
+			fmt.Println(node.NodeId)
 		}
 		fmt.Print(">")
 	}
