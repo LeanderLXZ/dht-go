@@ -2,3 +2,6 @@
 ._*
 .vscode/
 bin/
+pkg/*
+src/*
+!src/dht/*
