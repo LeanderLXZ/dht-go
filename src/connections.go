@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	emptyNode            = &Node{}
+	emptyNode            = &NodeRPC{}
 	emptyRequest         = &ER{}
 	emptyGetResponse     = &GetResponse{}
 	emptySetResponse     = &SetResponse{}
@@ -25,19 +25,19 @@ type Connections interface {
 	Start() error
 	Stop() error
 
-	GetNextNode(*Node) (*Node, error)
-	GetNextNodeById(*Node, []byte) (*Node, error)
-	GetPreNode(*Node) (*Node, error)
-	Inform(*Node, *Node) error
-	CheckPreNode(*Node) error
-	SetPreNode(*Node, *Node) error
-	SetNextNode(*Node, *Node) error
+	GetNextNode(*NodeRPC) (*NodeRPC, error)
+	GetNextNodeById(*NodeRPC, []byte) (*NodeRPC, error)
+	GetPreNode(*NodeRPC) (*NodeRPC, error)
+	Inform(*NodeRPC, *NodeRPC) error
+	CheckPreNode(*NodeRPC) error
+	SetPreNode(*NodeRPC, *NodeRPC) error
+	SetNextNode(*NodeRPC, *NodeRPC) error
 
-	GetValue(*Node, string) (*GetResponse, error)
-	AddKey(*Node, string, string) error
-	DeleteKey(*Node, string) error
-	GetKeys(*Node, []byte, []byte) ([]*KV, error)
-	DeleteKeys(*Node, []string) error
+	GetValue(*NodeRPC, string) (*GetResponse, error)
+	AddKey(*NodeRPC, string, string) error
+	DeleteKey(*NodeRPC, string) error
+	GetKeys(*NodeRPC, []byte, []byte) ([]*KeyValuePair, error)
+	DeleteKeys(*NodeRPC, []string) error
 }
 
 type GrpcConnection struct {
@@ -191,135 +191,135 @@ func (g *GrpcConnection) listen() {
 	g.server.Serve(g.sock)
 }
 
-func (g *GrpcConnection) GetNextNode(node *Node) (*Node, error) {
+func (g *GrpcConnection) GetNextNode(node *NodeRPC) (*NodeRPC, error) {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetNextNode(state, emptyRequest)
+		return client.GetNextNode(ctx, emptyRequest)
 	}
 	return nil, err
 }
 
-func (g *GrpcConnection) GetNextNodeById(node *Node, id []byte) (*Node, error) {
+func (g *GrpcConnection) GetNextNodeById(node *NodeRPC, id []byte) (*NodeRPC, error) {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetNextNodeById(state, &ID{Id: id})
+		return client.GetNextNodeById(ctx, &ID{Id: id})
 	}
 	return nil, err
 }
 
-func (g *GrpcConnection) GetPreNode(node *Node) (*Node, error) {
+func (g *GrpcConnection) GetPreNode(node *NodeRPC) (*NodeRPC, error) {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetPreNode(state, emptyRequest)
+		return client.GetPreNode(ctx, emptyRequest)
 	}
 	return nil, err
 }
 
-func (g *GrpcConnection) SetPreNode(node *Node, pred *Node) error {
+func (g *GrpcConnection) SetPreNode(node *NodeRPC, pred *NodeRPC) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.SetPreNode(state, pred)
+		_, err = client.SetPreNode(ctx, pred)
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) SetNextNode(node *Node, succ *Node) error {
+func (g *GrpcConnection) SetNextNode(node *NodeRPC, succ *NodeRPC) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.SetNextNode(state, succ)
+		_, err = client.SetNextNode(ctx, succ)
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) CheckPreNode(node *Node) error {
+func (g *GrpcConnection) CheckPreNode(node *NodeRPC) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.CheckPreNodeById(state, &ID{Id: node.Id})
+		_, err = client.CheckPreNodeById(ctx, &ID{Id: node.Id})
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) Inform(node, pred *Node) error {
+func (g *GrpcConnection) Inform(node, pred *NodeRPC) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.Inform(state, pred)
+		_, err = client.Inform(ctx, pred)
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) AddKey(node *Node, key, value string) error {
+func (g *GrpcConnection) AddKey(node *NodeRPC, key, value string) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.AddKey(state, &SetRequest{Key: key, Value: value})
+		_, err = client.AddKey(ctx, &SetRequest{Key: key, Value: value})
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) GetValue(node *Node, key string) (*GetResponse, error) {
+func (g *GrpcConnection) GetValue(node *NodeRPC, key string) (*GetResponse, error) {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		return client.GetValue(state, &GetRequest{Key: key})
+		return client.GetValue(ctx, &GetRequest{Key: key})
 	}
 	return nil, err
 }
 
-func (g *GrpcConnection) DeleteKey(node *Node, key string) error {
+func (g *GrpcConnection) DeleteKey(node *NodeRPC, key string) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.DeleteKey(state, &DeleteRequest{Key: key})
+		_, err = client.DeleteKey(ctx, &DeleteRequest{Key: key})
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) DeleteKeys(node *Node, keys []string) error {
+func (g *GrpcConnection) DeleteKeys(node *NodeRPC, keys []string) error {
 	client, err := g.getConn(node.Addr)
 	if err == nil {
-		state, cancel := context.WithTimeout(context.Background(), g.timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
 		_, err = client.DeleteKeys(
-			state, &MultiDeleteRequest{Keys: keys},
+			ctx, &MultiDeleteRequest{Keys: keys},
 		)
 		return err
 	}
 	return err
 }
 
-func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KV, error) {
+func (g *GrpcConnection) GetKeys(node *Node, from, to []byte) ([]*KeyValuePair, error) {
 	client, err := g.getConn(node.Addr)
 	if err != nil {
 		return nil, err
 	}
 
-	state, cancel := context.WithTimeout(context.Background(), g.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 	defer cancel()
 	val, err := client.GetKeys(
-		state, &GetKeysRequest{From: from, To: to},
+		ctx, &GetKeysRequest{From: from, To: to},
 	)
 	if err != nil {
 		return nil, err

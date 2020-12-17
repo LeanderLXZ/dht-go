@@ -7,10 +7,10 @@ import (
 
 type fingerTable []*fingerEntry
 
-func newFingerTable(node *models.Node, m int) fingerTable {
+func newFingerTable(node *NodeRPC, m int) fingerTable {
 	ft := make([]*fingerEntry, m)
 	for i := range ft {
-		ft[i] = newFingerEntry(FingerMath(node.Id, i, m), node)
+		ft[i] = newFingerEntry(FingerMath(node.NodeId, i, m), node)
 	}
 
 	return ft
@@ -18,10 +18,10 @@ func newFingerTable(node *models.Node, m int) fingerTable {
 
 type fingerEntry struct {
 	InitId     []byte
-	RemoteNode *models.Node
+	RemoteNode *NodeRPC
 }
 
-func newFingerEntry(initId []byte, remoteNode *models.Node) *fingerEntry {
+func newFingerEntry(initId []byte, remoteNode *NodeRPC) *fingerEntry {
 	return &fingerEntry{
 		InitId:     initId,
 		RemoteNode: remoteNode,
@@ -29,20 +29,19 @@ func newFingerEntry(initId []byte, remoteNode *models.Node) *fingerEntry {
 }
 
 func (node *Node) findNextFinger(next int) int {
-	nextHash := FingerMath(node.Id, next, n.cnf.HashSize)
-	nextOne, errors := node.findSuccessor(nextHash)
-	nextNum := (next + 1) % node.cnf.HashSize
+	nextHash := FingerMath(node.NodeId, next, node.para.HashLen)
+	nextOne, errors := node.findNextNode(nextHash)
+	nextNum := (next + 1) % node.para.HashLen
 	if err != nil || nextOne == nil {
 		fmt.Println("error: ", errors, nextOne)
-		fmt.Printf("finger lookup failed %x %x \n", node.Id, nextHash)
+		fmt.Printf("finger lookup failed %x %x \n", node.NodeId, nextHash)
 		return nextNum
 	}
 
 	finger := newFingerEntry(nextHash, nextOne)
-	node.ftMtx.Lock()
+	node.fingerLock.Lock()
 	node.fingerTable[next] = finger
-
-	node.ftMtx.Unlock()
+	node.fingerLock.Unlock()
 
 	return nextNum
 }

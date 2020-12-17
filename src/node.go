@@ -32,18 +32,18 @@ func (para *Parameters) Verify() erro {
 
 // Get a initial parameters settings
 func GetInitialParameters() *Parameters {
-	param := Parameters{}
-	param.HashFunc = sha1.New
-	param.HashLen = param.HashFunc.Size() * 8
-	param.DialOptions = make([grpc.DialOption, 0, 5])
-	param.DialOptions = append(
+	para := Parameters{}
+	para.HashFunc = sha1.New
+	para.HashLen = param.HashFunc.Size() * 8
+	para.DialOptions = make([grpc.DialOption, 0, 5])
+	para.DialOptions = append(
 		param.DialOptions,
 		grpc.WithBloc(),
 		grpc.WithTimeout(5*time.Second),
 		grpc.FailOnNonTempDialError(true),
 		grpc.WithInsecure()
 	)
-	return param
+	return para
 }
 
 func(node *Node)join(newNode rpc.Node) error {
@@ -112,7 +112,7 @@ func CreateNode(para *Parameters, newNode rpc.Node) (*Node, error) {
 	SInt := (&big.Int{}).SetBytes(hashId)
 	// fmt.Printf("new node id %d, \n", SInt)
 
-	node.Node.nodeId = nodeId
+	node.Node.NodeId = nodeId
 	node.Node.Address = para.Address
 
 	// create fingertable for new node
@@ -221,7 +221,7 @@ func (node *Node) CheckPreNode() {
 
 
 //  -----------------------------------------------
-// 					find Successor 
+// 					findNextNode
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
@@ -303,7 +303,7 @@ func (node *Node) getHashKey(key string) ([]byte, error) {
 }
 
 // get the location of a given key
-func (node *Node) getLocation(key string) (*models.Node, error) {
+func (node *Node) getLocation(key string) (*NodeRPC, error) {
 	nodeId, err := node.hashKey(key)
 	if err != nil {
 		return nil, err
@@ -324,7 +324,7 @@ func (node *Node) addKey(key, value string) error {
 
 // get the value of a given key
 func (node *Node) getValue(key string) ([]byte, error) {
-	node1, err := node.locate(key)
+	node1, err := node.getLocation(key)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +346,7 @@ func (node *Node) deleteKey(key string) error {
 }
 
 // When a new node is added to the ring, it gets the keys from the next node
-func (node *Node) getKeys(preNode, nextNode *models.Node) ([]*models.KV, error) {
+func (node *Node) getKeys(preNode, nextNode *NodeRPC) ([]KeyValuePair, error) {
 	if isEqual(node.nodeId, nextNode.nodeId) {
 		return nil, nil
 	}
@@ -356,12 +356,12 @@ func (node *Node) getKeys(preNode, nextNode *models.Node) ([]*models.KV, error) 
 }
 
 // delete given keys from the given model
-func (node *Node) deleteKeys(node1 *models.Node, keys []string) error {
+func (node *Node) deleteKeys(node1 *NodeRPC, keys []string) error {
 	return node.deleteKeysRPC(node1, keys)
 }
 
 // change the location of the keys
-func (node *Node) changeKeys(preNode, nextNode *models.Node) {
+func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 
 	keys, err := node.getKeys(preNode, nextNode)
 	if len(keys) > 0 {
@@ -473,20 +473,22 @@ func (node *Node) Inform(ctx context.Context, n rpc.Node) (rpc.emptyRequest, err
 
 // ---------------- Key Operations ----------------
 
-func (node *Node) GetLocation(key string) (*models.Node, error) {
+func (node *Node) GetLocation(key string) (*NodeRPC, error) {
 	return node.getLocation(key)
 }
 
 func (node *Node) GetValue(key string) ([]byte, error) {
 	return node.getValue(key)
 }
+
 func (node *Node) AddKey(key, value string) error {
 	return node.addKey(key, value)
 }
+
+// Delete a given key
 func (node *Node) DeleteKey(key string) error {
 	return node.deleteKey(key)
 }
-
 
 // ================================================
 //                  RPC Protocols
@@ -495,58 +497,58 @@ func (node *Node) DeleteKey(key string) error {
 // ---------------- Node Operations ---------------
 
 // Get the previous node of current node
-func (node *Node) getPreNodeRPC(node1 *models.Node) (*models.Node, error) {
+func (node *Node) getPreNodeRPC(node1 *NodeRPC) (*NodeRPC, error) {
 	return node.connections.GetPreNode(node1)
 }
 
 // Set the previous node for a given node
-func (node *Node) setPreNodeRPC(node1 *models.Node, preNode *models.Node) error {
+func (node *Node) setPreNodeRPC(node1 *NodeRPC, preNode *NodeRPC) error {
 	return node.connections.SetPreNode(node1, preNode)
 }
 
 // Get the next node of current node
-func (node *Node) GetNextNodeRPC(node1 *models.Node) (*models.Node, error) {
+func (node *Node) GetNextNodeRPC(node1 *NodeRPC) (*NodeRPC, error) {
 	return node.connections.GetNextNode(node1)
 }
 
 // Get the next node given an id
-func (node *Node) getNextNodeByIdRPC(node1 *models.Node, nodeId []byte) (*models.Node, error) {
+func (node *Node) getNextNodeByIdRPC(node1 *NodeRPC, nodeId []byte) (*NodeRPC, error) {
 	return node.connections.GetNextNodeById(node1, nodeId)
 }
 
 // Set the next node of a given node
-func (node *Node) setNextNodeRPC(node1 *models.Node, nextNode *models.Node) error {
+func (node *Node) setNextNodeRPC(node1 *NodeRPC, nextNode *NodeRPC) error {
 	return node.connections.SetNextNode(node1, nextNode)
 }
 
 // Inform the node to be the previous node of current node
-func (node *Node) informRPC(node1, predNode *models.Node) error {
+func (node *Node) informRPC(node1, predNode *NodeRPC) error {
 	return node.connections.Inform(node1, preNode)
 }
 
 // ---------------- Key Operations ----------------
 
 // Get the value given a key
-func (node *Node) getValueRPC(node1 *models.Node, key string) (*models.GetResponse, error) {
+func (node *Node) getValueRPC(node1 *NodeRPC, key string) (*GetValueResp, error) {
 	return node.connections.GetValue(node1, key)
 }
 
 // Add a (key, value) pair
-func (node *Node) addKeyRPC(node1 *models.Node, key, value string) error {
+func (node *Node) addKeyRPC(node1 *NodeRPC, key, value string) error {
 	return node.connections.AddKey(node1, key, value)
 }
 
 // Get keys from a given range
-func (node *Node) GetKeysRPC(node1 *models.Node, start []byte, end []byte) ([]*models.KV, error) {
+func (node *Node) GetKeysRPC(node1 *NodeRPC, start []byte, end []byte) ([]KeyValuePair, error) {
 	return node.connections.GetKeys(node1, start, end)
 }
 
 // Delete a given key
-func (node *Node) deleteKeyRPC(node1 *models.Node, key string) error {
+func (node *Node) deleteKeyRPC(node1 *NodeRPC, key string) error {
 	return node.connections.DeleteKey(node1, key)
 }
 
 // Delete multiple keys
-func (node *Node) deleteKeysRPC(node1 *models.Node, keys []string) error {
+func (node *Node) deleteKeysRPC(node1 *NodeRPC, keys []string) error {
 	return node.connections.DeleteKeys(node1, keys)
 }
