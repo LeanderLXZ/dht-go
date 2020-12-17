@@ -45,21 +45,21 @@ func GetInitialParameters() *Parameters {
 	return para
 }
 
-func(node *Node)join(newNode rpc.Node) error {
+func(node *Node)join(newNode NodeRPC) error {
 
 }
 
 // Structure of Node
 type Node struct {
-	rpc.Node
+	NodeRPC
 	para 			*Parameters
 
 	closeCh			chan struct{}
 
-	predecessor 	rpc.Node
+	predecessor 	NodeRPC
 	predLock		sync.RWMutex
 
-	successor		rpc.Node
+	successor		NodeRPC
 	succLock		sync.RWMutex
 
 	fingerTable 	fingerTable
@@ -85,13 +85,13 @@ type Node struct {
 // 	create a new node and peridoically stablize it
 // 			return error if node already exists		
 //	-----------------------------------------------
-func CreateNode(para *Parameters, newNode rpc.Node) (*Node, error) {
+func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
 	if err := para.Verify(); err != nil {
 		return nil, err
 	}
 
 	node := &Node {
-		Node:			new(rpc.Node),
+		Node:			new(NodeRPC),
 		closeCh:		make(chan struct{}),
 		para:			parameters,
 		dataStorage:	NewMapStore(para.HashFunc),
@@ -124,7 +124,7 @@ func CreateNode(para *Parameters, newNode rpc.Node) (*Node, error) {
 	}
 	node.connections = connect
 
-	rpc.RegisterDistributedHashTableServer(connect.server, node)
+	RegisterDistributedHashTableServer(connect.server, node)
 
 	node.connections.Start()
 
@@ -224,7 +224,7 @@ func (node *Node) CheckPreNode() {
 // 			reference from paper fig. 5
 // 			ask node n to find the successor of id
 //	-----------------------------------------------
-func(node *Node) findNextNode(nodeId []byte) (rpc.Node, error){
+func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
 	node.succLock.RLock()
 	defer node.succLock.RUnlock()
 	currNode := node.Node
@@ -390,7 +390,7 @@ func (node *Node) changeKeys(preNode, nextNode *NodeRPC) {
 
 
 // get the predecessor node and return it
-func(node *Node) GetPreNode(ctx context.Context, r rpc.EmptyRequest) (rpc.EmptyRequest, error) {
+func(node *Node) GetPreNode(ctx context.Context, r EmptyRequest) (EmptyRequest, error) {
 	node.predLock.RLock()
 	preNode := node.predecessor
 	node.predLock.RUnlock()
@@ -401,7 +401,7 @@ func(node *Node) GetPreNode(ctx context.Context, r rpc.EmptyRequest) (rpc.EmptyR
 }
 
 // set the predecessor node 
-func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.EmptyRequest, error) {
+func(node *Node) SetPreNode(ctx context.Context, preNode NodeRPC) (EmptyRequest, error) {
 	node.predLock.Lock()
 	node.preNode = preNode
 	node.predLock.Unlock()
@@ -409,7 +409,7 @@ func(node *Node) SetPreNode(ctx context.Context, preNode rpc.Node) (rpc.EmptyReq
 }
 
 // get the successor node and return it 
-func(node *Node) GetNextNode(ctx context.Context, r rpc.EmptyRequest) (rpc.EmptyRequest, error) {
+func(node *Node) GetNextNode(ctx context.Context, r EmptyRequest) (EmptyRequest, error) {
 	node.succLock.RLock()
 	NextNode := node.successor
 	node.succLock.RUnlock()
@@ -420,18 +420,18 @@ func(node *Node) GetNextNode(ctx context.Context, r rpc.EmptyRequest) (rpc.Empty
 }
 
 // set the successor node
-func(node *Node) SetNextNode(ctx context.Context, NextNode rpc.Node) (rpc.EmptyRequest, error) {
+func(node *Node) SetNextNode(ctx context.Context, NextNode NodeRPC) (EmptyRequest, error) {
 	node.succLock.Lock()
 	node.successor = NextNode
 	node.succLock.Unlock()
 	return emptyRequest, nil
 }
 
-func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (rpc.Node, error) {
+func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (NodeRPC, error) {
 	return emptyRequest, nil
 }
 
-func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (rpc.Node, error) {
+func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (NodeRPC, error) {
 	succNode, err := node.findNextNode(nodeId.NodeId)
 	if err != nil {
 		return nil, err
@@ -445,10 +445,10 @@ func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (rpc.No
 
 }
 
-func (node *Node) Inform(ctx context.Context, n rpc.Node) (rpc.emptyRequest, error) {
+func (node *Node) Inform(ctx context.Context, n NodeRPC) (rpc.emptyRequest, error) {
 	node.predLock.Lock()
 	defer node.predMtx.Unlock()
-	var prevNode rpc.Node
+	var prevNode NodeRPC
 
 	predNode := node.predecessor
 	if predNode == nil || between(node.Id, predNode.Id, node.nodeId) {
