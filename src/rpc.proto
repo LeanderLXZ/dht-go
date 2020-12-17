@@ -5,7 +5,7 @@ package src;
 // ================ Node ================
 
 // Structure of a Node
-message Node {
+message NodeRPC {
 	string address = 2;
 	bytes nodeId = 1;
 }
@@ -105,23 +105,23 @@ service DistributedHashTable {
 	// ---------------- Node Operations ---------------
 
 	// Set the previous node of a given node
-	rpc SetPreNode(Node) returns (EmptyRequest);
+	rpc SetPreNode(NodeRPC) returns (EmptyRequest);
 
 	// Set the next node of a given node
-	rpc SetNextNode(Node) returns (EmptyRequest);
+	rpc SetNextNode(NodeRPC) returns (EmptyRequest);
 
 	// Get the previous node of current node
-	rpc GetPreNode(EmptyRequest) returns (Node);
+	rpc GetPreNode(EmptyRequest) returns (NodeRPC);
 
 	// Get the next node of current node
-	rpc GetNextNode(EmptyRequest) returns (Node);
+	rpc GetNextNode(EmptyRequest) returns (NodeRPC);
 
 	// Check whether the previous node is still connected
 	rpc CheckPreNodeById(NodeId) returns (EmptyRequest);
 
 	// Get the next node given an id
-	rpc GetNextNodeById(NodeId) returns (Node);
+	rpc GetNextNodeById(NodeId) returns (NodeRPC);
 
 	// Inform the node to be the previous node of current node
-	rpc Inform(Node) returns (EmptyRequest);
+	rpc Inform(NodeRPC) returns (EmptyRequest);
 }

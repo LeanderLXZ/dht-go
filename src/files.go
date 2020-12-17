@@ -9,7 +9,7 @@ type file interface {
 	Set(string, string) error
 	Delete(string) error
 	Between([]byte, []byte) ([]*KeyValuePair, error)
-	MDelete(...string) error 
+	MDelete(...string) error
 }
 
 type DataHash struct {
