@@ -12,7 +12,7 @@ import (
 
 // Structure for parameters
 type Parameters struct {
-	NodeID        string
+	NodeId        string
 	Address       string
 	HashFunc      func() hash.Hash 		// Hash function
 	HashLen       int              		// Length of hash
@@ -214,7 +214,7 @@ func(node *Node) findNextNode(nodeId []byte) (NodeRPC, error){
 		return succNode, nil
 	} else {
 		preNode := node.closestPreNode(nodeId)
-		if isEqual(preNode.nodeId, node.NodeID){
+		if isEqual(preNode.nodeId, node.NodeId){
 			succNode, err = node.getNextNodeRPC(preNode)
 			if err != nil {
 				return nil, err
@@ -377,8 +377,8 @@ func CreateNode(para *Parameters, newNode NodeRPC) (*Node, error) {
 	}
 
 	var nodeId string
-	if para.NodeID != "" {
-		nodeId = para.NodeID
+	if para.NodeId != "" {
+		nodeId = para.NodeId
 	} else {
 		nodeId = para.Address
 	}
