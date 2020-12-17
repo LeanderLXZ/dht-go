@@ -25,7 +25,7 @@ type Parameters struct {
 }
 
 // hashsize bigger than hash func size
-func (para *Parameters) Verify() erro {
+func (para *Parameters) Verify() error {
 	return nil
 }
 
@@ -346,7 +346,7 @@ func (node *Node) deleteKey(key string) error {
 
 // When a new node is added to the ring, it gets the keys from the next node
 func (node *Node) getKeys(preNode, nextNode *NodeRPC) ([]KeyValuePair, error) {
-	if isEqual(node.nodeId, nextNode.nodeId) {
+	if isEqual(node.nodeId, nextNode.NodeId) {
 		return nil, nil
 	}
 	return node.getKeysRPC(
@@ -427,11 +427,11 @@ func(node *Node) SetNextNode(ctx context.Context, NextNode NodeRPC) (EmptyReques
 	return emptyRequest, nil
 }
 
-func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId rpc.NodeId) (NodeRPC, error) {
+func(node *Node) CheckPreNodeById(ctx context.Context, preNodeId NodeIdRPC) (NodeRPC, error) {
 	return emptyRequest, nil
 }
 
-func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (NodeRPC, error) {
+func(node *Node) GetNextNodeById(ctx context.context, nodeId NodeIdRPC) (NodeRPC, error) {
 	succNode, err := node.findNextNode(nodeId.NodeId)
 	if err != nil {
 		return nil, err
@@ -445,7 +445,7 @@ func(node *Node) GetNextNodeById(ctx context.context, nodeId rpc.NodeId) (NodeRP
 
 }
 
-func (node *Node) Inform(ctx context.Context, n NodeRPC) (rpc.emptyRequest, error) {
+func (node *Node) Inform(ctx context.Context, n NodeRPC) (EmptyRequest, error) {
 	node.predLock.Lock()
 	defer node.predMtx.Unlock()
 	var prevNode NodeRPC

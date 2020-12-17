@@ -11,7 +11,7 @@ message NodeRPC {
 }
 
 // Node Id
-message NodeId {
+message NodeIdRPC {
 	bytes nodeId = 1;
 }
 
@@ -117,10 +117,10 @@ service DistributedHashTable {
 	rpc GetNextNode(EmptyRequest) returns (NodeRPC);
 
 	// Check whether the previous node is still connected
-	rpc CheckPreNodeById(NodeId) returns (EmptyRequest);
+	rpc CheckPreNodeById(NodeIdRPC) returns (EmptyRequest);
 
 	// Get the next node given an id
-	rpc GetNextNodeById(NodeId) returns (NodeRPC);
+	rpc GetNextNodeById(NodeIdRPC) returns (NodeRPC);
 
 	// Inform the node to be the previous node of current node
 	rpc Inform(NodeRPC) returns (EmptyRequest);

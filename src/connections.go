@@ -248,7 +248,7 @@ func (g *GrpcConnection) CheckPreNode(node *NodeRPC) error {
 	if err == nil {
 		ctx, cancel := context.WithTimeout(context.Background(), g.timeout)
 		defer cancel()
-		_, err = client.CheckPreNodeById(ctx, &ID{Id: node.Id})
+		_, err = client.CheckPreNodeById(ctx, &ID{Id: node.NodeId})
 		return err
 	}
 	return err
