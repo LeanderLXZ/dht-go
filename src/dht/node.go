@@ -97,7 +97,7 @@ type Node struct {
 	fingerTable fingerTable
 	fingerLock  sync.RWMutex
 
-	dataStorage file
+	dataStorage hash_table
 	stLock      sync.RWMutex
 
 	connections Connections
@@ -288,19 +288,35 @@ func (node *Node) getLocation(key string) (*NodeRPC, error) {
 		return nil, err
 	}
 	nextNode, err := node.findNextNode(nodeId)
-	fmt.Println("----------------------------------------------------------------")
-	fmt.Printf(
-		"[Command] Get the location of a key: %s\n\tHashKey: %d\n\tLocation: %d\n",
-		key,
-		(&big.Int{}).SetBytes(nodeId),
-		(&big.Int{}).SetBytes(nextNode.NodeId),
-	)
-	return nextNode, err
+	value, _ := node.getValueRPC(nextNode, key)
+	if value != nil {
+		fmt.Println("----------------------------------------------------------------")
+		fmt.Printf(
+			"[Command] Get the location of a key: %s\n\tHashKey: %d\n\tLocation: %d\n",
+			key,
+			(&big.Int{}).SetBytes(nodeId),
+			(&big.Int{}).SetBytes(nextNode.NodeId),
+		)
+		return nextNode, err
+	} else {
+		fmt.Println("----------------------------------------------------------------")
+		fmt.Printf(
+			"[Command] Get the location of a key: %s\n\tHashKey: %d\n\tLocation: %s\n",
+			key,
+			(&big.Int{}).SetBytes(nodeId),
+			"Key not found",
+		)
+		return nil, nil
+	}
 }
 
 // Add a (key, value) pair
 func (node *Node) addKey(key, value string) error {
-	node1, err := node.getLocation(key)
+	nodeId, err := node.getHashKey(key)
+	if err != nil {
+		return err
+	}
+	node1, err := node.findNextNode(nodeId)
 	if err != nil {
 		return err
 	}
@@ -324,13 +340,20 @@ func (node *Node) addKey(key, value string) error {
 
 // get the value of a given key
 func (node *Node) getValue(key string) ([]byte, error) {
-	node1, err := node.getLocation(key)
+	nodeId, err := node.getHashKey(key)
+	if err != nil {
+		return nil, err
+	}
+	node1, err := node.findNextNode(nodeId)
 	if err != nil {
 		return nil, err
 	}
 	value, err := node.getValueRPC(node1, key)
-	if err != nil {
-		return nil, err
+	var v string
+	if value != nil {
+		v = string(value.Value)
+	} else {
+		v = "Key not found"
 	}
 	fmt.Println("----------------------------------------------------------------")
 	hk, errhk := node.getHashKey(key)
@@ -342,19 +365,26 @@ func (node *Node) getValue(key string) ([]byte, error) {
 			key,
 			(&big.Int{}).SetBytes(hk),
 			(&big.Int{}).SetBytes(node1.NodeId),
-			string(value.Value),
+			v,
 		)
 	}
-	return value.Value, nil
+	if value != nil {
+		return value.Value, nil
+	} else {
+		return nil, nil
+	}
 }
 
 // Delete a given key
 func (node *Node) deleteKey(key string) error {
-	node1, err := node.getLocation(key)
+	nodeId, err := node.getHashKey(key)
 	if err != nil {
 		return err
 	}
-	fmt.Println("----------------------------------------------------------------")
+	node1, err := node.findNextNode(nodeId)
+	if err != nil {
+		return err
+	}
 	hk, errhk := node.getHashKey(key)
 	if errhk != nil {
 		return errhk
@@ -365,6 +395,13 @@ func (node *Node) deleteKey(key string) error {
 			(&big.Int{}).SetBytes(hk),
 			(&big.Int{}).SetBytes(node1.NodeId),
 		)
+	}
+
+	value, err := node.getValueRPC(node1, key)
+	if value != nil {
+		fmt.Printf("\tState: Succeed\n")
+	} else {
+		fmt.Printf("\tState: Failed - Key not found\n")
 	}
 	err = node.deleteKeyRPC(node1, key)
 	return err
@@ -449,6 +486,7 @@ func CreateNode(para *Parameters, newNode *NodeRPC) (*Node, error) {
 	node.NodeRPC.Address = para.Address
 
 	// create fingertable for new node
+	fmt.Println("[Log] Created finger table for the node.")
 	node.fingerTable = newFingerTable(node.NodeRPC, para.HashLen)
 
 	// start RPC
@@ -587,6 +625,11 @@ func (node *Node) AddKey(key, value string) error {
 // Delete a given key
 func (node *Node) DeleteKey(key string) error {
 	return node.deleteKey(key)
+}
+
+// Get finger table
+func (node *Node) GetFingerTable() []*fingerEntry {
+	return node.fingerTable
 }
 
 // ---------------- Rewrite RPC -------------------
