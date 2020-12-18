@@ -2,6 +2,7 @@
 ._*
 .vscode/
 bin/
-pkg/*
-src/*
-!src/dht/*
+pkg/
+src/github.com/
+src/golang.org/
+src/google.golang.org/
