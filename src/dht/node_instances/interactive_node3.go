@@ -28,7 +28,7 @@ func main() {
 	id1 := "12"
 	sister := dht.CreateNodeById(id1, "0.0.0.0:8004")
 
-	h, err := createNode("18", "0.0.0.0:8005", sister)
+	h, err := createNode("24", "0.0.0.0:8006", sister)
 	if err != nil {
 		log.Fatalln(err)
 		return

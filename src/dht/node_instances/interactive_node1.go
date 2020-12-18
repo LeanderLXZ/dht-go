@@ -25,10 +25,8 @@ func createNode(id string, addr string, sister *dht.NodeRPC) (*dht.Node, error) 
 }
 
 func main() {
-	id1 := "1"
-	sister := dht.CreateNodeById(id1, "0.0.0.0:8001")
 
-	h, err := createNode("12", "0.0.0.0:8004", sister)
+	h, err := createNode("12", "0.0.0.0:8004", nil)
 	if err != nil {
 		log.Fatalln(err)
 		return
