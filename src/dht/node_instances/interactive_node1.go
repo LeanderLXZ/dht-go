@@ -53,7 +53,7 @@ func main() {
 					log.Println("err: ", sErr)
 				}
 			} else if array[0] == "del" {
-				if len(array) != 1 {
+				if len(array) != 2 {
 					fmt.Println("Incorrect input! Please input again.")
 					goto JUMPPOINT
 				}
@@ -110,6 +110,13 @@ func main() {
 					fmt.Println("-----------------------------")
 					fmt.Printf("Length of finger table: %d\n", len(fts))
 				}
+			} else if array[0] == "id" {
+				if len(array) != 1 {
+					fmt.Println("Incorrect input! Please input again.")
+					goto JUMPPOINT
+				}
+				id := h.GetNodeId()
+				fmt.Printf("Node ID: %d\n", (&big.Int{}).SetBytes(id))
 			} else {
 				fmt.Println("Incorrect input! Please input again.")
 			}

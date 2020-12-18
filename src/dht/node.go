@@ -632,6 +632,11 @@ func (node *Node) GetFingerTable() []*fingerEntry {
 	return node.fingerTable
 }
 
+// Get NodeId
+func (node *Node) GetNodeId() []byte {
+	return node.NodeId
+}
+
 // ---------------- Rewrite RPC -------------------
 
 func (node *Node) GetValueHT(ctx context.Context, req *GetValueReq) (*GetValueResp, error) {
