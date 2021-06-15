@@ -1,14 +1,3 @@
-# SCHRODINGER Final Project
-Final Project for CSCI 6421 
-
-Team Members
-```
-Xuzheng Lu (Leader)
-Zetian Zheng
-Xiaoyu Shen
-Guangyuan Shen
-```
-
 ## Topic: Distributed Hash Table
 
 A Distributed Hash Table (DHT) is a distributed system that provides a lookup service similar to a hash table [(Wikipedia: Distributed hash table)](https://en.wikipedia.org/wiki/Distributed_hash_table?oldformat=true). The network maintains a huge file index hash table, divided and stored on each node of the network according to certain rules, with entries in the form of (key, value). Usually, the key is the hash value of the file, and the value is the IP address where the file is stored. Given the key, the value/address stored in the node can be efficiently found and returned to the query node.
