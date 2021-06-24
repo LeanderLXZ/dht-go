@@ -45,14 +45,6 @@ Distributed Hash Tables are both fault tolerant and resilient when key/value pai
   
    For reference, in Apache Cassandra, an open-source NoSQL DHT system, each node can communicate with a constant amount of other nodes, which let the system to scale linearly over a huge number of nodes [(John Hammink, 2019)](https://aiven.io/blog/an-introduction-to-apache-cassandra#:~:text=This%20is%20one%20of%20the,and%20data%20centers%20go%20down).
 
-## Metrics
-
-We should use the following metrics to evaluate our project/product:
-
-1. There is no central node to coordinate the relationship between each node.
-2. The system composed of multiple nodes to store different hash tables.
-3. Nodes can be added or withdrawn freely.After adding a new node, the position of the node can be correctly determined. When a node exits or fails, it can exit correctly without affecting other nodes to continue.
-4. The main storage of the hash table is the key-value pair.
 
 ## Programming Environment
 
@@ -79,3 +71,19 @@ We should use the following metrics to evaluate our project/product:
 8. Damian Gryski. (2018). Consistent Hashing: Algorithmic Tradeoffs. Medium, https://medium.com/@dgryski/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8
 <a id='rf9'></a>
 9. Farhan Ali Khan.(2018).Chord: Building a DHT (Distributed Hash Table) in Golang. Medium. https://medium.com/techlog/chord-building-a-dht-distributed-hash-table-in-golang-67c3ce17417b
+
+## Report
+
+https://github.com/LeanderLXZ/dht-go/blob/main/docs/Report.pdf
+
+![](imgs/Report-01.jpg)
+![](imgs/Report-02.jpg)
+![](imgs/Report-03.jpg)
+![](imgs/Report-04.jpg)
+![](imgs/Report-05.jpg)
+![](imgs/Report-06.jpg)
+![](imgs/Report-07.jpg)
+![](imgs/Report-08.jpg)
+![](imgs/Report-09.jpg)
+![](imgs/Report-10.jpg)
+![](imgs/Report-11.jpg)
